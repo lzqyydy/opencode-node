@@ -8,6 +8,7 @@ import DESCRIPTION from "./read.txt"
 import { Instance } from "../project/instance"
 import { Identifier } from "../id/id"
 import { assertExternalDirectory } from "./external-directory"
+import { NodePolyFillBun, type NodeBunFile } from "../util/node-files"
 
 const DEFAULT_READ_LIMIT = 2000
 const MAX_LINE_LENGTH = 2000
@@ -38,7 +39,7 @@ export const ReadTool = Tool.define("read", {
       metadata: {},
     })
 
-    const file = Bun.file(filepath)
+    const file = NodePolyFillBun.file(filepath)
     if (!(await file.exists())) {
       const dir = path.dirname(filepath)
       const base = path.basename(filepath)
@@ -144,7 +145,7 @@ export const ReadTool = Tool.define("read", {
   },
 })
 
-async function isBinaryFile(filepath: string, file: Bun.BunFile): Promise<boolean> {
+async function isBinaryFile(filepath: string, file: NodeBunFile): Promise<boolean> {
   const ext = path.extname(filepath).toLowerCase()
   // binary check for common non-text extensions
   switch (ext) {

@@ -31,6 +31,7 @@ import { DialogAlert } from "../../ui/dialog-alert"
 import { useToast } from "../../ui/toast"
 import { useKV } from "../../context/kv"
 import { useTextareaKeybindings } from "../textarea-keybindings"
+import {NodePolyFillBun} from "@/util/node-files.ts"
 
 export type PromptProps = {
   sessionID?: string
@@ -884,7 +885,7 @@ export function Prompt(props: PromptProps) {
                 const isUrl = /^(https?):\/\//.test(filepath)
                 if (!isUrl) {
                   try {
-                    const file = Bun.file(filepath)
+                    const file = NodePolyFillBun.file(filepath)
                     // Handle SVG as raw text content, not as base64 image
                     if (file.type === "image/svg+xml") {
                       event.preventDefault()

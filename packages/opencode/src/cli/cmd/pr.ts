@@ -1,7 +1,7 @@
 import { UI } from "../ui"
 import { cmd } from "./cmd"
 import { Instance } from "@/project/instance"
-import { $ } from "bun"
+import { $ } from "@/util/node-shell"
 
 export const PrCommand = cmd({
   command: "pr <number>",

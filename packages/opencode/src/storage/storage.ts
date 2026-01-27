@@ -5,9 +5,10 @@ import { Global } from "../global"
 import { Filesystem } from "../util/filesystem"
 import { lazy } from "../util/lazy"
 import { Lock } from "../util/lock"
-import { $ } from "bun"
+import { $ } from "@/util/node-shell"
 import { NamedError } from "@opencode-ai/util/error"
 import z from "zod"
+import { NodePolyFillBun } from "../util/node-files"
 
 export namespace Storage {
   const log = Log.create({ service: "storage" })
@@ -39,7 +40,7 @@ export namespace Storage {
             cwd: path.join(project, projectDir),
             absolute: true,
           })) {
-            const json = await Bun.file(msgFile).json()
+            const json = await NodePolyFillBun.file(msgFile).json()
             worktree = json.path?.root
             if (worktree) break
           }
@@ -60,7 +61,7 @@ export namespace Storage {
           if (!id) continue
           projectID = id
 
-          await Bun.write(
+          await NodePolyFillBun.write(
             path.join(dir, "project", projectID + ".json"),
             JSON.stringify({
               id,
@@ -83,8 +84,8 @@ export namespace Storage {
               sessionFile,
               dest,
             })
-            const session = await Bun.file(sessionFile).json()
-            await Bun.write(dest, JSON.stringify(session))
+            const session = await NodePolyFillBun.file(sessionFile).json()
+            await NodePolyFillBun.write(dest, JSON.stringify(session))
             log.info(`migrating messages for session ${session.id}`)
             for await (const msgFile of new Bun.Glob(`storage/session/message/${session.id}/*.json`).scan({
               cwd: fullProjectDir,
@@ -95,8 +96,8 @@ export namespace Storage {
                 msgFile,
                 dest,
               })
-              const message = await Bun.file(msgFile).json()
-              await Bun.write(dest, JSON.stringify(message))
+              const message = await NodePolyFillBun.file(msgFile).json()
+              await NodePolyFillBun.write(dest, JSON.stringify(message))
 
               log.info(`migrating parts for message ${message.id}`)
               for await (const partFile of new Bun.Glob(`storage/session/part/${session.id}/${message.id}/*.json`).scan(
@@ -106,12 +107,12 @@ export namespace Storage {
                 },
               )) {
                 const dest = path.join(dir, "part", message.id, path.basename(partFile))
-                const part = await Bun.file(partFile).json()
+                const part = await NodePolyFillBun.file(partFile).json()
                 log.info("copying", {
                   partFile,
                   dest,
                 })
-                await Bun.write(dest, JSON.stringify(part))
+                await NodePolyFillBun.write(dest, JSON.stringify(part))
               }
             }
           }
@@ -123,12 +124,12 @@ export namespace Storage {
         cwd: dir,
         absolute: true,
       })) {
-        const session = await Bun.file(item).json()
+        const session = await NodePolyFillBun.file(item).json()
         if (!session.projectID) continue
         if (!session.summary?.diffs) continue
         const { diffs } = session.summary
-        await Bun.file(path.join(dir, "session_diff", session.id + ".json")).write(JSON.stringify(diffs))
-        await Bun.file(path.join(dir, "session", session.projectID, session.id + ".json")).write(
+        await NodePolyFillBun.file(path.join(dir, "session_diff", session.id + ".json")).write(JSON.stringify(diffs))
+        await NodePolyFillBun.file(path.join(dir, "session", session.projectID, session.id + ".json")).write(
           JSON.stringify({
             ...session,
             summary: {
@@ -143,7 +144,7 @@ export namespace Storage {
 
   const state = lazy(async () => {
     const dir = path.join(Global.Path.data, "storage")
-    const migration = await Bun.file(path.join(dir, "migration"))
+    const migration = await NodePolyFillBun.file(path.join(dir, "migration"))
       .json()
       .then((x) => parseInt(x))
       .catch(() => 0)
@@ -151,7 +152,7 @@ export namespace Storage {
       log.info("running migration", { index })
       const migration = MIGRATIONS[index]
       await migration(dir).catch(() => log.error("failed to run migration", { index }))
-      await Bun.write(path.join(dir, "migration"), (index + 1).toString())
+      await NodePolyFillBun.write(path.join(dir, "migration"), (index + 1).toString())
     }
     return {
       dir,
@@ -171,7 +172,7 @@ export namespace Storage {
     const target = path.join(dir, ...key) + ".json"
     return withErrorHandling(async () => {
       using _ = await Lock.read(target)
-      const result = await Bun.file(target).json()
+      const result = await NodePolyFillBun.file(target).json()
       return result as T
     })
   }
@@ -181,9 +182,9 @@ export namespace Storage {
     const target = path.join(dir, ...key) + ".json"
     return withErrorHandling(async () => {
       using _ = await Lock.write(target)
-      const content = await Bun.file(target).json()
+      const content = await NodePolyFillBun.file(target).json()
       fn(content)
-      await Bun.write(target, JSON.stringify(content, null, 2))
+      await NodePolyFillBun.write(target, JSON.stringify(content, null, 2))
       return content as T
     })
   }
@@ -193,7 +194,7 @@ export namespace Storage {
     const target = path.join(dir, ...key) + ".json"
     return withErrorHandling(async () => {
       using _ = await Lock.write(target)
-      await Bun.write(target, JSON.stringify(content, null, 2))
+      await NodePolyFillBun.write(target, JSON.stringify(content, null, 2))
     })
   }
 

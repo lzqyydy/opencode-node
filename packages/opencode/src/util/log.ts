@@ -2,6 +2,7 @@ import path from "path"
 import fs from "fs/promises"
 import { Global } from "../global"
 import z from "zod"
+import {NodePolyFillBun} from "./node-files"
 
 export namespace Log {
   export const Level = z.enum(["DEBUG", "INFO", "WARN", "ERROR"]).meta({ ref: "LogLevel", description: "Log level" })
@@ -63,7 +64,7 @@ export namespace Log {
       Global.Path.log,
       options.dev ? "dev.log" : new Date().toISOString().split(".")[0].replace(/:/g, "") + ".log",
     )
-    const logfile = Bun.file(logpath)
+    const logfile = NodePolyFillBun.file(logpath)
     await fs.truncate(logpath).catch(() => {})
     const writer = logfile.writer()
     write = async (msg: any) => {

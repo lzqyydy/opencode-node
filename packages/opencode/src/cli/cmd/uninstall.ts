@@ -3,10 +3,11 @@ import { UI } from "../ui"
 import * as prompts from "@clack/prompts"
 import { Installation } from "../../installation"
 import { Global } from "../../global"
-import { $ } from "bun"
+import { $ } from "@/util/node-shell"
 import fs from "fs/promises"
 import path from "path"
 import os from "os"
+import {NodePolyFillBun} from "@/util/node-files"
 
 interface UninstallArgs {
   keepConfig: boolean
@@ -199,7 +200,7 @@ async function executeUninstall(method: Installation.Method, targets: RemovalTar
         spinner.stop(`Package manager uninstall failed: exit code ${result.exitCode}`, 1)
         if (
           method === "choco" &&
-          result.stdout.toString("utf8").includes("not running from an elevated command shell")
+          result.stdout.toString().includes("not running from an elevated command shell")
         ) {
           prompts.log.warn(`You may need to run '${cmd.join(" ")}' from an elevated command shell`)
         } else {
@@ -267,7 +268,7 @@ async function getShellConfigFile(): Promise<string | null> {
       .catch(() => false)
     if (!exists) continue
 
-    const content = await Bun.file(file)
+    const content = await NodePolyFillBun.file(file)
       .text()
       .catch(() => "")
     if (content.includes("# opencode") || content.includes(".opencode/bin")) {
@@ -279,7 +280,7 @@ async function getShellConfigFile(): Promise<string | null> {
 }
 
 async function cleanShellConfig(file: string) {
-  const content = await Bun.file(file).text()
+  const content = await NodePolyFillBun.file(file).text()
   const lines = content.split("\n")
 
   const filtered: string[] = []
@@ -315,7 +316,7 @@ async function cleanShellConfig(file: string) {
   }
 
   const output = filtered.join("\n") + "\n"
-  await Bun.write(file, output)
+  await NodePolyFillBun.write(file, output)
 }
 
 async function getDirectorySize(dir: string): Promise<number> {

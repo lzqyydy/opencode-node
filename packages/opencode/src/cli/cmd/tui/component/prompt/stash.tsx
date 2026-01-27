@@ -6,6 +6,7 @@ import { clone } from "remeda"
 import { createSimpleContext } from "../../context/helper"
 import { appendFile, writeFile } from "fs/promises"
 import type { PromptInfo } from "./history"
+import {NodePolyFillBun} from "@/util/node-files"
 
 export type StashEntry = {
   input: string
@@ -18,7 +19,7 @@ const MAX_STASH_ENTRIES = 50
 export const { use: usePromptStash, provider: PromptStashProvider } = createSimpleContext({
   name: "PromptStash",
   init: () => {
-    const stashFile = Bun.file(path.join(Global.Path.state, "prompt-stash.jsonl"))
+    const stashFile = NodePolyFillBun.file(path.join(Global.Path.state, "prompt-stash.jsonl"))
     onMount(async () => {
       const text = await stashFile.text().catch(() => "")
       const lines = text

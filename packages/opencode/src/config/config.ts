@@ -28,6 +28,7 @@ import { existsSync } from "fs"
 import { Bus } from "@/bus"
 import { GlobalBus } from "@/bus/global"
 import { Event } from "../server/event"
+import {NodePolyFillBun} from "@/util/node-files"
 
 export namespace Config {
   const log = Log.create({ service: "config" })
@@ -204,13 +205,13 @@ export namespace Config {
   export async function installDependencies(dir: string) {
     const pkg = path.join(dir, "package.json")
 
-    if (!(await Bun.file(pkg).exists())) {
-      await Bun.write(pkg, "{}")
+    if (!(await NodePolyFillBun.file(pkg).exists())) {
+      await NodePolyFillBun.write(pkg, "{}")
     }
 
     const gitignore = path.join(dir, ".gitignore")
-    const hasGitIgnore = await Bun.file(gitignore).exists()
-    if (!hasGitIgnore) await Bun.write(gitignore, ["node_modules", "package.json", "bun.lock", ".gitignore"].join("\n"))
+    const hasGitIgnore = await NodePolyFillBun.file(gitignore).exists()
+    if (!hasGitIgnore) await NodePolyFillBun.write(gitignore, ["node_modules", "package.json", "bun.lock", ".gitignore"].join("\n"))
 
     await BunProc.run(
       ["add", "@opencode-ai/plugin@" + (Installation.isLocal() ? "latest" : Installation.VERSION), "--exact"],
@@ -1114,7 +1115,7 @@ export namespace Config {
         if (provider && model) result.model = `${provider}/${model}`
         result["$schema"] = "https://opencode.ai/config.json"
         result = mergeDeep(result, rest)
-        await Bun.write(path.join(Global.Path.config, "config.json"), JSON.stringify(result, null, 2))
+        await NodePolyFillBun.write(path.join(Global.Path.config, "config.json"), JSON.stringify(result, null, 2))
         await fs.unlink(path.join(Global.Path.config, "config"))
       })
       .catch(() => {})
@@ -1124,7 +1125,7 @@ export namespace Config {
 
   async function loadFile(filepath: string): Promise<Info> {
     log.info("loading", { path: filepath })
-    let text = await Bun.file(filepath)
+    let text = await NodePolyFillBun.file(filepath)
       .text()
       .catch((err) => {
         if (err.code === "ENOENT") return
@@ -1156,7 +1157,7 @@ export namespace Config {
         }
         const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(configDir, filePath)
         const fileContent = (
-          await Bun.file(resolvedPath)
+          await NodePolyFillBun.file(resolvedPath)
             .text()
             .catch((error) => {
               const errMsg = `bad file reference: "${match}"`
@@ -1207,7 +1208,7 @@ export namespace Config {
         parsed.data.$schema = "https://opencode.ai/config.json"
         // Write the $schema to the original text to preserve variables like {env:VAR}
         const updated = original.replace(/^\s*\{/, '{\n  "$schema": "https://opencode.ai/config.json",')
-        await Bun.write(configFilepath, updated).catch(() => {})
+        await NodePolyFillBun.write(configFilepath, updated).catch(() => {})
       }
       const data = parsed.data
       if (data.plugin) {
@@ -1263,7 +1264,7 @@ export namespace Config {
   export async function update(config: Info) {
     const filepath = path.join(Instance.directory, "config.json")
     const existing = await loadFile(filepath)
-    await Bun.write(filepath, JSON.stringify(mergeDeep(existing, config), null, 2))
+    await NodePolyFillBun.write(filepath, JSON.stringify(mergeDeep(existing, config), null, 2))
     await Instance.dispose()
   }
 
@@ -1334,7 +1335,7 @@ export namespace Config {
 
   export async function updateGlobal(config: Info) {
     const filepath = globalConfigFile()
-    const before = await Bun.file(filepath)
+    const before = await NodePolyFillBun.file(filepath)
       .text()
       .catch((err) => {
         if (err.code === "ENOENT") return "{}"
@@ -1343,11 +1344,11 @@ export namespace Config {
 
     if (!filepath.endsWith(".jsonc")) {
       const existing = parseConfig(before, filepath)
-      await Bun.write(filepath, JSON.stringify(mergeDeep(existing, config), null, 2))
+      await NodePolyFillBun.write(filepath, JSON.stringify(mergeDeep(existing, config), null, 2))
     } else {
       const next = patchJsonc(before, config)
       parseConfig(next, filepath)
-      await Bun.write(filepath, next)
+      await NodePolyFillBun.write(filepath, next)
     }
 
     global.reset()

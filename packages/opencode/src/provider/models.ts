@@ -5,6 +5,7 @@ import z from "zod"
 import { data } from "./models-macro" with { type: "macro" }
 import { Installation } from "../installation"
 import { Flag } from "../flag/flag"
+import {NodePolyFillBun} from "@/util/node-files"
 
 export namespace ModelsDev {
   const log = Log.create({ service: "models.dev" })
@@ -78,7 +79,7 @@ export namespace ModelsDev {
 
   export async function get() {
     refresh()
-    const file = Bun.file(filepath)
+    const file = NodePolyFillBun.file(filepath)
     const result = await file.json().catch(() => {})
     if (result) return result as Record<string, Provider>
     if (typeof data === "function") {
@@ -92,7 +93,7 @@ export namespace ModelsDev {
 
   export async function refresh() {
     if (Flag.OPENCODE_DISABLE_MODELS_FETCH) return
-    const file = Bun.file(filepath)
+    const file = NodePolyFillBun.file(filepath)
     log.info("refreshing", {
       file,
     })
@@ -107,7 +108,7 @@ export namespace ModelsDev {
         error: e,
       })
     })
-    if (result && result.ok) await Bun.write(file, await result.text())
+    if (result && result.ok) await NodePolyFillBun.write(file, await result.text())
   }
 }
 

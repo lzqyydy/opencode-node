@@ -7,6 +7,7 @@ import { Log } from "../util/log"
 import { Instance } from "../project/instance"
 import path from "path"
 import os from "os"
+import { NodePolyFillBun } from "../util/node-files"
 
 import PROMPT_ANTHROPIC from "./prompt/anthropic.txt"
 import PROMPT_ANTHROPIC_WITHOUT_TODO from "./prompt/qwen.txt"
@@ -107,7 +108,7 @@ export namespace SystemPrompt {
     }
 
     for (const globalRuleFile of GLOBAL_RULE_FILES) {
-      if (await Bun.file(globalRuleFile).exists()) {
+      if (await NodePolyFillBun.file(globalRuleFile).exists()) {
         paths.add(globalRuleFile)
         break
       }
@@ -140,7 +141,7 @@ export namespace SystemPrompt {
     }
 
     const foundFiles = Array.from(paths).map((p) =>
-      Bun.file(p)
+      NodePolyFillBun.file(p)
         .text()
         .catch(() => "")
         .then((x) => "Instructions from: " + p + "\n" + x),

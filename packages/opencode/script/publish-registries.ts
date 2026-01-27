@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-import { $ } from "bun"
+import {NodePolyFillBun} from "@/util/node-files"
+import { $ } from "@/util/node-shell"
 import { Script } from "@opencode-ai/script"
 
 if (!Script.preview) {
@@ -113,7 +114,7 @@ if (!Script.preview) {
         await $`rm -rf ./dist/aur-${pkg}`
         await $`git clone ssh://aur@aur.archlinux.org/${pkg}.git ./dist/aur-${pkg}`
         await $`cd ./dist/aur-${pkg} && git checkout master`
-        await Bun.file(`./dist/aur-${pkg}/PKGBUILD`).write(pkgbuild)
+        await NodePolyFillBun.file(`./dist/aur-${pkg}/PKGBUILD`).write(pkgbuild)
         await $`cd ./dist/aur-${pkg} && makepkg --printsrcinfo > .SRCINFO`
         await $`cd ./dist/aur-${pkg} && git add PKGBUILD .SRCINFO`
         await $`cd ./dist/aur-${pkg} && git commit -m "Update to v${Script.version}"`
@@ -180,7 +181,7 @@ if (!Script.preview) {
 
   await $`rm -rf ./dist/homebrew-tap`
   await $`git clone https://${process.env["GITHUB_TOKEN"]}@github.com/sst/homebrew-tap.git ./dist/homebrew-tap`
-  await Bun.file("./dist/homebrew-tap/opencode.rb").write(homebrewFormula)
+  await NodePolyFillBun.file("./dist/homebrew-tap/opencode.rb").write(homebrewFormula)
   await $`cd ./dist/homebrew-tap && git add opencode.rb`
   await $`cd ./dist/homebrew-tap && git commit -m "Update to v${Script.version}"`
   await $`cd ./dist/homebrew-tap && git push`

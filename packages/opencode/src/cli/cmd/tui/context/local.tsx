@@ -12,6 +12,7 @@ import { Provider } from "@/provider/provider"
 import { useArgs } from "./args"
 import { useSDK } from "./sdk"
 import { RGBA } from "@opentui/core"
+import {NodePolyFillBun} from "@/util/node-files"
 
 export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
   name: "Local",
@@ -112,7 +113,7 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
         variant: {},
       })
 
-      const file = Bun.file(path.join(Global.Path.state, "model.json"))
+      const file = NodePolyFillBun.file(path.join(Global.Path.state, "model.json"))
       const state = {
         pending: false,
       }
@@ -123,7 +124,7 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
           return
         }
         state.pending = false
-        Bun.write(
+        NodePolyFillBun.write(
           file,
           JSON.stringify({
             recent: modelStore.recent,

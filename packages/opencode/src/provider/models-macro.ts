@@ -1,9 +1,10 @@
+import {NodePolyFillBun} from "@/util/node-files"
 import { Global } from "../global"
 
 export async function data() {
   const path = Bun.env.MODELS_DEV_API_JSON
   if (path) {
-    const file = Bun.file(path)
+    const file = NodePolyFillBun.file(path)
     if (await file.exists()) {
       return await file.text()
     }

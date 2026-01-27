@@ -14,6 +14,7 @@ import path from "path"
 import { Global } from "../../global"
 import { modify, applyEdits } from "jsonc-parser"
 import { Bus } from "../../bus"
+import {NodePolyFillBun} from "@/util/node-files"
 
 function getAuthStatusIcon(status: MCP.AuthStatus): string {
   switch (status) {
@@ -388,7 +389,7 @@ async function resolveConfigPath(baseDir: string, global = false) {
   }
 
   for (const candidate of candidates) {
-    if (await Bun.file(candidate).exists()) {
+    if (await NodePolyFillBun.file(candidate).exists()) {
       return candidate
     }
   }
@@ -398,7 +399,7 @@ async function resolveConfigPath(baseDir: string, global = false) {
 }
 
 async function addMcpToConfig(name: string, mcpConfig: Config.Mcp, configPath: string) {
-  const file = Bun.file(configPath)
+  const file = NodePolyFillBun.file(configPath)
 
   let text = "{}"
   if (await file.exists()) {
@@ -411,7 +412,7 @@ async function addMcpToConfig(name: string, mcpConfig: Config.Mcp, configPath: s
   })
   const result = applyEdits(text, edits)
 
-  await Bun.write(configPath, result)
+  await NodePolyFillBun.write(configPath, result)
 
   return configPath
 }

@@ -5,6 +5,7 @@ import { bootstrap } from "../bootstrap"
 import { Storage } from "../../storage/storage"
 import { Instance } from "../../project/instance"
 import { EOL } from "os"
+import {NodePolyFillBun} from "@/util/node-files"
 
 export const ImportCommand = cmd({
   command: "import <file>",
@@ -66,7 +67,7 @@ export const ImportCommand = cmd({
           }),
         }
       } else {
-        const file = Bun.file(args.file)
+        const file = NodePolyFillBun.file(args.file)
         exportData = await file.json().catch(() => {})
         if (!exportData) {
           process.stdout.write(`File not found: ${args.file}`)

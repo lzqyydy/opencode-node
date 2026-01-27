@@ -4,9 +4,10 @@ import { Log } from "../util/log"
 import path from "path"
 import { Filesystem } from "../util/filesystem"
 import { NamedError } from "@opencode-ai/util/error"
-import { readableStreamToText } from "bun"
+import { readableStreamToText } from "../util/node-utils"
 import { createRequire } from "module"
 import { Lock } from "../util/lock"
+import { NodePolyFillBun } from "../util/node-files"
 
 export namespace BunProc {
   const log = Log.create({ service: "bun" })
@@ -66,10 +67,10 @@ export namespace BunProc {
     using _ = await Lock.write("bun-install")
 
     const mod = path.join(Global.Path.cache, "node_modules", pkg)
-    const pkgjson = Bun.file(path.join(Global.Path.cache, "package.json"))
+    const pkgjson = NodePolyFillBun.file(path.join(Global.Path.cache, "package.json"))
     const parsed = await pkgjson.json().catch(async () => {
       const result = { dependencies: {} }
-      await Bun.write(pkgjson.name!, JSON.stringify(result, null, 2))
+      await NodePolyFillBun.write(pkgjson.name!, JSON.stringify(result, null, 2))
       return result
     })
     const dependencies = parsed.dependencies ?? {}
@@ -120,7 +121,7 @@ export namespace BunProc {
     // This ensures subsequent starts use the cached version until explicitly updated
     let resolvedVersion = version
     if (version === "latest") {
-      const installedPkgJson = Bun.file(path.join(mod, "package.json"))
+      const installedPkgJson = NodePolyFillBun.file(path.join(mod, "package.json"))
       const installedPkg = await installedPkgJson.json().catch(() => null)
       if (installedPkg?.version) {
         resolvedVersion = installedPkg.version
@@ -128,7 +129,7 @@ export namespace BunProc {
     }
 
     parsed.dependencies[pkg] = resolvedVersion
-    await Bun.write(pkgjson.name!, JSON.stringify(parsed, null, 2))
+    await NodePolyFillBun.write(pkgjson.name!, JSON.stringify(parsed, null, 2))
     return mod
   }
 }

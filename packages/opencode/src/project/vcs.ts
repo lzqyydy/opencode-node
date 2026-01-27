@@ -1,6 +1,6 @@
 import { BusEvent } from "@/bus/bus-event"
 import { Bus } from "@/bus"
-import { $ } from "bun"
+import { $ } from "@/util/node-shell"
 import path from "path"
 import z from "zod"
 import { Log } from "@/util/log"

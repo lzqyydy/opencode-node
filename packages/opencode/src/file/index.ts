@@ -1,7 +1,6 @@
 import { BusEvent } from "@/bus/bus-event"
 import z from "zod"
-import { $ } from "bun"
-import type { BunFile } from "bun"
+import { $ } from "@/util/node-shell"
 import { formatPatch, structuredPatch } from "diff"
 import path from "path"
 import fs from "fs"
@@ -12,6 +11,7 @@ import { Instance } from "../project/instance"
 import { Ripgrep } from "./ripgrep"
 import fuzzysort from "fuzzysort"
 import { Global } from "../global"
+import {NodePolyFillBun, type NodeBunFile} from "@/util/node-files"
 
 export namespace File {
   const log = Log.create({ service: "file" })
@@ -73,7 +73,7 @@ export namespace File {
     })
   export type Content = z.infer<typeof Content>
 
-  async function shouldEncode(file: BunFile): Promise<boolean> {
+  async function shouldEncode(file: NodeBunFile): Promise<boolean> {
     const type = file.type?.toLowerCase()
     log.info("shouldEncode", { type })
     if (!type) return false
@@ -233,7 +233,7 @@ export namespace File {
       const untrackedFiles = untrackedOutput.trim().split("\n")
       for (const filepath of untrackedFiles) {
         try {
-          const content = await Bun.file(path.join(Instance.directory, filepath)).text()
+          const content = await NodePolyFillBun.file(path.join(Instance.directory, filepath)).text()
           const lines = content.split("\n").length
           changedFiles.push({
             path: filepath,
@@ -283,7 +283,7 @@ export namespace File {
       throw new Error(`Access denied: path escapes project directory`)
     }
 
-    const bunFile = Bun.file(full)
+    const bunFile = NodePolyFillBun.file(full)
 
     if (!(await bunFile.exists())) {
       return { type: "text", content: "" }
@@ -325,11 +325,11 @@ export namespace File {
     let ignored = (_: string) => false
     if (project.vcs === "git") {
       const ig = ignore()
-      const gitignore = Bun.file(path.join(Instance.worktree, ".gitignore"))
+      const gitignore = NodePolyFillBun.file(path.join(Instance.worktree, ".gitignore"))
       if (await gitignore.exists()) {
         ig.add(await gitignore.text())
       }
-      const ignoreFile = Bun.file(path.join(Instance.worktree, ".ignore"))
+      const ignoreFile = NodePolyFillBun.file(path.join(Instance.worktree, ".ignore"))
       if (await ignoreFile.exists()) {
         ig.add(await ignoreFile.text())
       }

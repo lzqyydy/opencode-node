@@ -10,6 +10,7 @@ import matter from "gray-matter"
 import { Instance } from "../../project/instance"
 import { EOL } from "os"
 import type { Argv } from "yargs"
+import {NodePolyFillBun} from "@/util/node-files"
 
 type AgentMode = "all" | "primary" | "subagent"
 
@@ -202,7 +203,7 @@ const AgentCreateCommand = cmd({
 
         await fs.mkdir(targetPath, { recursive: true })
 
-        const file = Bun.file(filePath)
+        const file = NodePolyFillBun.file(filePath)
         if (await file.exists()) {
           if (isFullyNonInteractive) {
             console.error(`Error: Agent file already exists: ${filePath}`)
@@ -212,7 +213,7 @@ const AgentCreateCommand = cmd({
           throw new UI.CancelledError()
         }
 
-        await Bun.write(filePath, content)
+        await NodePolyFillBun.write(filePath, content)
 
         if (isFullyNonInteractive) {
           console.log(filePath)

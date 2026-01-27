@@ -6,6 +6,7 @@ import DESCRIPTION from "./grep.txt"
 import { Instance } from "../project/instance"
 import path from "path"
 import { assertExternalDirectory } from "./external-directory"
+import { NodePolyFillBun } from "../util/node-files"
 
 const MAX_LINE_LENGTH = 2000
 
@@ -90,7 +91,7 @@ export const GrepTool = Tool.define("grep", {
       const lineNum = parseInt(lineNumStr, 10)
       const lineText = lineTextParts.join("|")
 
-      const file = Bun.file(filePath)
+      const file = NodePolyFillBun.file(filePath)
       const stats = await file.stat().catch(() => null)
       if (!stats) continue
 

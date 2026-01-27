@@ -1,4 +1,4 @@
-import { $ } from "bun"
+import { $ } from "./node-shell"
 import path from "path"
 
 export namespace Archive {

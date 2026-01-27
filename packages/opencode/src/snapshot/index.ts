@@ -1,4 +1,4 @@
-import { $ } from "bun"
+import { $ } from "@/util/node-shell"
 import path from "path"
 import fs from "fs/promises"
 import { Log } from "../util/log"

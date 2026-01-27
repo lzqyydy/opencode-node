@@ -1,15 +1,16 @@
 import { realpathSync } from "fs"
 import { dirname, join, relative } from "path"
+import {NodePolyFillBun} from "./node-files"
 
 export namespace Filesystem {
   export const exists = (p: string) =>
-    Bun.file(p)
+    NodePolyFillBun.file(p)
       .stat()
       .then(() => true)
       .catch(() => false)
 
   export const isDir = (p: string) =>
-    Bun.file(p)
+    NodePolyFillBun.file(p)
       .stat()
       .then((s) => s.isDirectory())
       .catch(() => false)

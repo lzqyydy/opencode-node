@@ -26,7 +26,8 @@ import { Provider } from "../../provider/provider"
 import { Bus } from "../../bus"
 import { MessageV2 } from "../../session/message-v2"
 import { SessionPrompt } from "@/session/prompt"
-import { $ } from "bun"
+import { $ } from "@/util/node-shell"
+import {NodePolyFillBun} from "@/util/node-files"
 
 type GitHubAuthor = {
   login: string
@@ -368,7 +369,7 @@ export const GithubInstallCommand = cmd({
                 ? ""
                 : `\n        env:${providers[provider].env.map((e) => `\n          ${e}: \${{ secrets.${e} }}`).join("")}`
 
-            await Bun.write(
+            await NodePolyFillBun.write(
               path.join(app.root, WORKFLOW_FILE),
               `name: opencode
 
@@ -627,7 +628,7 @@ export const GithubRunCommand = cmd({
       } catch (e: any) {
         exitCode = 1
         console.error(e instanceof Error ? e.message : String(e))
-        let msg = e
+        let msg = String(e)
         if (e instanceof $.ShellError) {
           msg = e.stderr.toString()
         } else if (e instanceof Error) {

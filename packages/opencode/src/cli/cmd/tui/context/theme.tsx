@@ -42,6 +42,7 @@ import { createStore, produce } from "solid-js/store"
 import { Global } from "@/global"
 import { Filesystem } from "@/util/filesystem"
 import { useSDK } from "./sdk"
+import {NodePolyFillBun} from "@/util/node-files"
 
 type ThemeColors = {
   primary: RGBA
@@ -413,7 +414,7 @@ async function getCustomThemes() {
       cwd: dir,
     })) {
       const name = path.basename(item, ".json")
-      result[name] = await Bun.file(item).json()
+      result[name] = await NodePolyFillBun.file(item).json()
     }
   }
   return result

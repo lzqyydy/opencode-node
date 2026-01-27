@@ -11,6 +11,7 @@ import { createOpencodeClient, type OpencodeClient } from "@opencode-ai/sdk/v2"
 import { Server } from "../../server/server"
 import { Provider } from "../../provider/provider"
 import { Agent } from "../../agent/agent"
+import {NodePolyFillBun} from "@/util/node-files"
 
 const TOOL: Record<string, [string, string]> = {
   todowrite: ["Todo", UI.Style.TEXT_WARNING_BOLD],
@@ -103,7 +104,7 @@ export const RunCommand = cmd({
 
       for (const filePath of files) {
         const resolvedPath = path.resolve(process.cwd(), filePath)
-        const file = Bun.file(resolvedPath)
+        const file = NodePolyFillBun.file(resolvedPath)
         const stats = await file.stat().catch(() => {})
         if (!stats) {
           UI.error(`File not found: ${filePath}`)

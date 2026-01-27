@@ -1,9 +1,10 @@
-import { $ } from "bun"
+import { $ } from "@/util/node-shell"
 import { platform, release } from "os"
 import clipboardy from "clipboardy"
 import { lazy } from "../../../../util/lazy.js"
 import { tmpdir } from "os"
 import path from "path"
+import {NodePolyFillBun} from "@/util/node-files.js"
 
 /**
  * Writes text to clipboard via OSC 52 escape sequence.
@@ -35,7 +36,7 @@ export namespace Clipboard {
         await $`osascript -e 'set imageData to the clipboard as "PNGf"' -e 'set fileRef to open for access POSIX file "${tmpfile}" with write permission' -e 'set eof fileRef to 0' -e 'write imageData to fileRef' -e 'close access fileRef'`
           .nothrow()
           .quiet()
-        const file = Bun.file(tmpfile)
+        const file = NodePolyFillBun.file(tmpfile)
         const buffer = await file.arrayBuffer()
         return { data: Buffer.from(buffer).toString("base64"), mime: "image/png" }
       } catch {

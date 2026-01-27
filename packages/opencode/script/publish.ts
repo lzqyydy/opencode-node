@@ -1,8 +1,9 @@
 #!/usr/bin/env bun
-import { $ } from "bun"
+import { $ } from "@/util/node-shell"
 import pkg from "../package.json"
 import { Script } from "@opencode-ai/script"
 import { fileURLToPath } from "url"
+import {NodePolyFillBun} from "@/util/node-files.ts"
 
 const dir = fileURLToPath(new URL("..", import.meta.url))
 process.chdir(dir)
@@ -18,7 +19,7 @@ await $`mkdir -p ./dist/${pkg.name}`
 await $`cp -r ./bin ./dist/${pkg.name}/bin`
 await $`cp ./script/postinstall.mjs ./dist/${pkg.name}/postinstall.mjs`
 
-await Bun.file(`./dist/${pkg.name}/package.json`).write(
+await NodePolyFillBun.file(`./dist/${pkg.name}/package.json`).write(
   JSON.stringify(
     {
       name: pkg.name + "-ai",

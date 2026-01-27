@@ -2,6 +2,7 @@
 
 import { z } from "zod"
 import { Config } from "../src/config/config"
+import {NodePolyFillBun} from "@/util/node-files"
 
 const file = process.argv[2]
 console.log(file)
@@ -44,4 +45,4 @@ const result = z.toJSONSchema(Config.Info, {
 result.allowComments = true
 result.allowTrailingCommas = true
 
-await Bun.write(file, JSON.stringify(result, null, 2))
+await NodePolyFillBun.write(file, JSON.stringify(result, null, 2))

@@ -4,6 +4,7 @@ import { onMount } from "solid-js"
 import { createStore } from "solid-js/store"
 import { createSimpleContext } from "../../context/helper"
 import { appendFile } from "fs/promises"
+import {NodePolyFillBun} from "@/util/node-files"
 
 function calculateFrecency(entry?: { frequency: number; lastOpen: number }): number {
   if (!entry) return 0
@@ -17,7 +18,7 @@ const MAX_FRECENCY_ENTRIES = 1000
 export const { use: useFrecency, provider: FrecencyProvider } = createSimpleContext({
   name: "Frecency",
   init: () => {
-    const frecencyFile = Bun.file(path.join(Global.Path.state, "frecency.jsonl"))
+    const frecencyFile = NodePolyFillBun.file(path.join(Global.Path.state, "frecency.jsonl"))
     onMount(async () => {
       const text = await frecencyFile.text().catch(() => "")
       const lines = text
@@ -53,7 +54,7 @@ export const { use: useFrecency, provider: FrecencyProvider } = createSimpleCont
 
       if (sorted.length > 0) {
         const content = sorted.map((entry) => JSON.stringify(entry)).join("\n") + "\n"
-        Bun.write(frecencyFile, content).catch(() => {})
+        NodePolyFillBun.write(frecencyFile, content).catch(() => {})
       }
     })
 
@@ -76,7 +77,7 @@ export const { use: useFrecency, provider: FrecencyProvider } = createSimpleCont
           .slice(0, MAX_FRECENCY_ENTRIES)
         setStore("data", Object.fromEntries(sorted))
         const content = sorted.map(([path, entry]) => JSON.stringify({ path, ...entry })).join("\n") + "\n"
-        Bun.write(frecencyFile, content).catch(() => {})
+        NodePolyFillBun.write(frecencyFile, content).catch(() => {})
       }
     }
 

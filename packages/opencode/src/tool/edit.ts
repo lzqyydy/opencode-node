@@ -16,6 +16,7 @@ import { Filesystem } from "../util/filesystem"
 import { Instance } from "../project/instance"
 import { Snapshot } from "@/snapshot"
 import { assertExternalDirectory } from "./external-directory"
+import { NodePolyFillBun } from "../util/node-files"
 
 const MAX_DIAGNOSTICS_PER_FILE = 20
 
@@ -59,7 +60,7 @@ export const EditTool = Tool.define("edit", {
             diff,
           },
         })
-        await Bun.write(filePath, params.newString)
+        await NodePolyFillBun.write(filePath, params.newString)
         await Bus.publish(File.Event.Edited, {
           file: filePath,
         })
@@ -67,7 +68,7 @@ export const EditTool = Tool.define("edit", {
         return
       }
 
-      const file = Bun.file(filePath)
+      const file = NodePolyFillBun.file(filePath)
       const stats = await file.stat().catch(() => {})
       if (!stats) throw new Error(`File ${filePath} not found`)
       if (stats.isDirectory()) throw new Error(`Path is a directory, not a file: ${filePath}`)

@@ -11,6 +11,7 @@ import { Filesystem } from "../util/filesystem"
 import { Instance } from "../project/instance"
 import { trimDiff } from "./edit"
 import { assertExternalDirectory } from "./external-directory"
+import { NodePolyFillBun } from "../util/node-files"
 
 const MAX_DIAGNOSTICS_PER_FILE = 20
 const MAX_PROJECT_DIAGNOSTICS_FILES = 5
@@ -25,7 +26,7 @@ export const WriteTool = Tool.define("write", {
     const filepath = path.isAbsolute(params.filePath) ? params.filePath : path.join(Instance.directory, params.filePath)
     await assertExternalDirectory(ctx, filepath)
 
-    const file = Bun.file(filepath)
+    const file = NodePolyFillBun.file(filepath)
     const exists = await file.exists()
     const contentOld = exists ? await file.text() : ""
     if (exists) await FileTime.assert(ctx.sessionID, filepath)
@@ -41,7 +42,7 @@ export const WriteTool = Tool.define("write", {
       },
     })
 
-    await Bun.write(filepath, params.content)
+    await NodePolyFillBun.write(filepath, params.content)
     await Bus.publish(File.Event.Edited, {
       file: filepath,
     })

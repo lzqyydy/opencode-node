@@ -1,3 +1,4 @@
+import {NodePolyFillBun} from "@/util/node-files"
 import { NamedError } from "@opencode-ai/util/error"
 import matter from "gray-matter"
 import { z } from "zod"
@@ -66,7 +67,7 @@ export namespace ConfigMarkdown {
   }
 
   export async function parse(filePath: string) {
-    const raw = await Bun.file(filePath).text()
+    const raw = await NodePolyFillBun.file(filePath).text()
     const template = preprocessFrontmatter(raw)
 
     try {

@@ -31,7 +31,8 @@ import { Flag } from "../flag/flag"
 import { ulid } from "ulid"
 import { spawn } from "child_process"
 import { Command } from "../command"
-import { $, fileURLToPath } from "bun"
+import { $ } from "@/util/node-shell"
+import { fileURLToPath } from "../util/node-utils"
 import { ConfigMarkdown } from "../config/markdown"
 import { SessionSummary } from "./summary"
 import { NamedError } from "@opencode-ai/util/error"
@@ -45,6 +46,7 @@ import { LLM } from "./llm"
 import { iife } from "@/util/iife"
 import { Shell } from "@/shell/shell"
 import { Truncate } from "@/tool/truncation"
+import { NodePolyFillBun } from "@/util/node-files"
 
 // @ts-ignore
 globalThis.AI_SDK_LOG_WARNINGS = false
@@ -945,7 +947,7 @@ export namespace SessionPrompt {
               // have to normalize, symbol search returns absolute paths
               // Decode the pathname since URL constructor doesn't automatically decode it
               const filepath = fileURLToPath(part.url)
-              const stat = await Bun.file(filepath).stat()
+              const stat = await NodePolyFillBun.file(filepath).stat()
 
               if (stat.isDirectory()) {
                 part.mime = "application/x-directory"
@@ -1099,7 +1101,7 @@ export namespace SessionPrompt {
                 ]
               }
 
-              const file = Bun.file(filepath)
+              const file = NodePolyFillBun.file(filepath)
               FileTime.read(input.sessionID, filepath)
               return [
                 {
@@ -1224,7 +1226,7 @@ export namespace SessionPrompt {
     // Switching from plan mode to build mode
     if (input.agent.name !== "plan" && assistantMessage?.info.agent === "plan") {
       const plan = Session.plan(input.session)
-      const exists = await Bun.file(plan).exists()
+      const exists = await NodePolyFillBun.file(plan).exists()
       if (exists) {
         const part = await Session.updatePart({
           id: Identifier.ascending("part"),
@@ -1243,7 +1245,7 @@ export namespace SessionPrompt {
     // Entering plan mode
     if (input.agent.name === "plan" && assistantMessage?.info.agent !== "plan") {
       const plan = Session.plan(input.session)
-      const exists = await Bun.file(plan).exists()
+      const exists = await NodePolyFillBun.file(plan).exists()
       if (!exists) await fs.mkdir(path.dirname(plan), { recursive: true })
       const part = await Session.updatePart({
         id: Identifier.ascending("part"),

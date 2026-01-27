@@ -2,7 +2,7 @@ import z from "zod"
 import fs from "fs/promises"
 import { Filesystem } from "../util/filesystem"
 import path from "path"
-import { $ } from "bun"
+import { $ } from "@/util/node-shell"
 import { Storage } from "../storage/storage"
 import { Log } from "../util/log"
 import { Flag } from "@/flag/flag"
@@ -13,6 +13,7 @@ import { BusEvent } from "@/bus/bus-event"
 import { iife } from "@/util/iife"
 import { GlobalBus } from "@/bus/global"
 import { existsSync } from "fs"
+import { NodePolyFillBun } from "../util/node-files"
 
 export namespace Project {
   const log = Log.create({ service: "project" })
@@ -58,7 +59,7 @@ export namespace Project {
         const gitBinary = Bun.which("git")
 
         // cached id calculation
-        let id = await Bun.file(path.join(git, "opencode"))
+        let id = await NodePolyFillBun.file(path.join(git, "opencode"))
           .text()
           .then((x) => x.trim())
           .catch(() => undefined)
@@ -99,7 +100,7 @@ export namespace Project {
 
           id = roots[0]
           if (id) {
-            void Bun.file(path.join(git, "opencode"))
+            void NodePolyFillBun.file(path.join(git, "opencode"))
               .write(id)
               .catch(() => undefined)
           }
@@ -229,7 +230,7 @@ export namespace Project {
     )
     const shortest = matches.sort((a, b) => a.length - b.length)[0]
     if (!shortest) return
-    const file = Bun.file(shortest)
+    const file = NodePolyFillBun.file(shortest)
     const buffer = await file.arrayBuffer()
     const base64 = Buffer.from(buffer).toString("base64")
     const mime = file.type || "image/png"

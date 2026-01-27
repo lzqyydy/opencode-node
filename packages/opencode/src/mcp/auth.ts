@@ -2,6 +2,7 @@ import path from "path"
 import fs from "fs/promises"
 import z from "zod"
 import { Global } from "../global"
+import { NodePolyFillBun } from "../util/node-files"
 
 export namespace McpAuth {
   export const Tokens = z.object({
@@ -54,26 +55,26 @@ export namespace McpAuth {
   }
 
   export async function all(): Promise<Record<string, Entry>> {
-    const file = Bun.file(filepath)
+    const file = NodePolyFillBun.file(filepath)
     return file.json().catch(() => ({}))
   }
 
   export async function set(mcpName: string, entry: Entry, serverUrl?: string): Promise<void> {
-    const file = Bun.file(filepath)
+    const file = NodePolyFillBun.file(filepath)
     const data = await all()
     // Always update serverUrl if provided
     if (serverUrl) {
       entry.serverUrl = serverUrl
     }
-    await Bun.write(file, JSON.stringify({ ...data, [mcpName]: entry }, null, 2))
+    await NodePolyFillBun.write(file, JSON.stringify({ ...data, [mcpName]: entry }, null, 2))
     await fs.chmod(file.name!, 0o600)
   }
 
   export async function remove(mcpName: string): Promise<void> {
-    const file = Bun.file(filepath)
+    const file = NodePolyFillBun.file(filepath)
     const data = await all()
     delete data[mcpName]
-    await Bun.write(file, JSON.stringify(data, null, 2))
+    await NodePolyFillBun.write(file, JSON.stringify(data, null, 2))
     await fs.chmod(file.name!, 0o600)
   }
 
