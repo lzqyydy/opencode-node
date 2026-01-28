@@ -111,7 +111,7 @@ export const TuiThreadCommand = cmd({
     })
 
     const prompt = await iife(async () => {
-      const piped = !process.stdin.isTTY ? await Bun.stdin.text() : undefined
+      const piped = !process.stdin.isTTY ? await NodePolyFillBun.stdin.text() : undefined
       if (!args.prompt) return piped
       return piped ? piped + "\n" + args.prompt : args.prompt
     })

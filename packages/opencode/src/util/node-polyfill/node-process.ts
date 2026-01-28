@@ -281,6 +281,24 @@ export function which(command: string, options?: WhichOptions): string | null {
 }
 
 /**
+ * stdin object compatible with Bun.stdin
+ */
+export const stdin = {
+  /**
+   * Read all stdin as text
+   */
+  async text(): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      let data = '';
+      process.stdin.setEncoding('utf8');
+      process.stdin.on('data', (chunk) => data += chunk);
+      process.stdin.on('end', () => resolve(data));
+      process.stdin.on('error', reject);
+    });
+  }
+}
+
+/**
  * Check if a file exists and is executable
  */
 function isExecutable(filepath: string): boolean {

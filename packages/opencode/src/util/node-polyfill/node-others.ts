@@ -2,6 +2,7 @@ import fs from "fs/promises"
 import path from "path"
 import { createRequire } from "module"
 import { minimatch } from "minimatch"
+import crypto from "crypto"
 
 /**
  * Sleep for a specified number of milliseconds (similar to Bun.sleep)
@@ -45,6 +46,56 @@ export async function resolve(specifier: string, parent?: string): Promise<strin
  * @param str - The string to measure
  * @returns The display width of the string
  */
+/**
+ * Hash utilities similar to Bun.hash
+ */
+export const hash = {
+  /**
+   * Compute xxHash32-compatible hash (using MD5 truncated to 32 bits for compatibility)
+   * This provides a fast, stable hash suitable for cache keys
+   * @param data - The data to hash (string, Buffer, or ArrayBuffer)
+   * @returns A 32-bit unsigned integer hash value
+   */
+  xxHash32(data: string | Buffer | ArrayBuffer | Uint8Array): number {
+    let buffer: Buffer
+    if (typeof data === "string") {
+      buffer = Buffer.from(data)
+    } else if (data instanceof ArrayBuffer) {
+      buffer = Buffer.from(data)
+    } else if (data instanceof Uint8Array) {
+      buffer = Buffer.from(data.buffer, data.byteOffset, data.byteLength)
+    } else {
+      buffer = data
+    }
+
+    // Use MD5 and take first 4 bytes as a 32-bit hash
+    // This provides similar distribution characteristics for cache keys
+    const md5 = crypto.createHash("md5").update(buffer).digest()
+    return md5.readUInt32LE(0)
+  },
+
+  /**
+   * Compute a general hash using the specified algorithm
+   * @param data - The data to hash
+   * @param algorithm - The hash algorithm (default: "sha256")
+   * @returns The hash as a hex string
+   */
+  digest(data: string | Buffer | ArrayBuffer | Uint8Array, algorithm: string = "sha256"): string {
+    let buffer: Buffer
+    if (typeof data === "string") {
+      buffer = Buffer.from(data)
+    } else if (data instanceof ArrayBuffer) {
+      buffer = Buffer.from(data)
+    } else if (data instanceof Uint8Array) {
+      buffer = Buffer.from(data.buffer, data.byteOffset, data.byteLength)
+    } else {
+      buffer = data
+    }
+
+    return crypto.createHash(algorithm).update(buffer).digest("hex")
+  },
+}
+
 export function stringWidth(str: string): number {
   if (!str || typeof str !== "string") {
     return 0

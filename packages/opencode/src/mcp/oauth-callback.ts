@@ -1,3 +1,4 @@
+import {NodePolyFillBun} from "@/util/node-polyfill"
 import { Log } from "../util/log"
 import { OAUTH_CALLBACK_PORT, OAUTH_CALLBACK_PATH } from "./oauth-provider"
 
@@ -51,7 +52,7 @@ interface PendingAuth {
 }
 
 export namespace McpOAuthCallback {
-  let server: ReturnType<typeof Bun.serve> | undefined
+  let server: ReturnType<typeof NodePolyFillBun.serve> | undefined
   const pendingAuths = new Map<string, PendingAuth>()
 
   const CALLBACK_TIMEOUT_MS = 5 * 60 * 1000 // 5 minutes
@@ -65,7 +66,7 @@ export namespace McpOAuthCallback {
       return
     }
 
-    server = Bun.serve({
+    server = NodePolyFillBun.serve({
       port: OAUTH_CALLBACK_PORT,
       fetch(req) {
         const url = new URL(req.url)
@@ -160,7 +161,7 @@ export namespace McpOAuthCallback {
 
   export async function isPortInUse(): Promise<boolean> {
     return new Promise((resolve) => {
-      Bun.connect({
+      NodePolyFillBun.connect({
         hostname: "127.0.0.1",
         port: OAUTH_CALLBACK_PORT,
         socket: {

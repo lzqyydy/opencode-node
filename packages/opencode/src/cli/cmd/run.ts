@@ -127,7 +127,7 @@ export const RunCommand = cmd({
       }
     }
 
-    if (!process.stdin.isTTY) message += "\n" + (await Bun.stdin.text())
+    if (!process.stdin.isTTY) message += "\n" + (await NodePolyFillBun.stdin.text())
 
     if (message.trim().length === 0 && !args.command) {
       UI.error("You must provide a message or a command")

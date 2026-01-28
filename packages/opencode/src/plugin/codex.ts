@@ -3,6 +3,7 @@ import { Log } from "../util/log"
 import { Installation } from "../installation"
 import { Auth, OAUTH_DUMMY_KEY } from "../auth"
 import os from "os"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 const log = Log.create({ service: "plugin.codex" })
 
@@ -237,7 +238,7 @@ interface PendingOAuth {
   reject: (error: Error) => void
 }
 
-let oauthServer: ReturnType<typeof Bun.serve> | undefined
+let oauthServer: ReturnType<typeof NodePolyFillBun.serve> | undefined
 let pendingOAuth: PendingOAuth | undefined
 
 async function startOAuthServer(): Promise<{ port: number; redirectUri: string }> {
@@ -245,7 +246,7 @@ async function startOAuthServer(): Promise<{ port: number; redirectUri: string }
     return { port: OAUTH_PORT, redirectUri: `http://localhost:${OAUTH_PORT}/auth/callback` }
   }
 
-  oauthServer = Bun.serve({
+  oauthServer = NodePolyFillBun.serve({
     port: OAUTH_PORT,
     fetch(req) {
       const url = new URL(req.url)
