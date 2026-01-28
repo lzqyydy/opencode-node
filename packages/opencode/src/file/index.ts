@@ -11,7 +11,7 @@ import { Instance } from "../project/instance"
 import { Ripgrep } from "./ripgrep"
 import fuzzysort from "fuzzysort"
 import { Global } from "../global"
-import {NodePolyFillBun, type NodeBunFile} from "@/util/node-files"
+import {NodePolyFillBun, type NodeBunFile} from "@/util/node-polyfill"
 
 export namespace File {
   const log = Log.create({ service: "file" })

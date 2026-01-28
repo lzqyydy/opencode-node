@@ -7,7 +7,7 @@ import { NamedError } from "@opencode-ai/util/error"
 import { readableStreamToText } from "../util/node-utils"
 import { createRequire } from "module"
 import { Lock } from "../util/lock"
-import { NodePolyFillBun } from "../util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 export namespace BunProc {
   const log = Log.create({ service: "bun" })
@@ -18,7 +18,7 @@ export namespace BunProc {
       cmd: [which(), ...cmd],
       ...options,
     })
-    const result = Bun.spawn([which(), ...cmd], {
+    const result = NodePolyFillBun.spawn([which(), ...cmd], {
       ...options,
       stdout: "pipe",
       stderr: "pipe",

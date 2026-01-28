@@ -7,7 +7,7 @@ import { Locale } from "../../util/locale"
 import { Flag } from "../../flag/flag"
 import { EOL } from "os"
 import path from "path"
-import {NodePolyFillBun} from "@/util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 function pagerCmd(): string[] {
   const lessOptions = ["-R", "-S"]
@@ -16,7 +16,7 @@ function pagerCmd(): string[] {
   }
 
   // user could have less installed via other options
-  const lessOnPath = Bun.which("less")
+  const lessOnPath = NodePolyFillBun.which("less")
   if (lessOnPath) {
     if (NodePolyFillBun.file(lessOnPath).size) return [lessOnPath, ...lessOptions]
   }
@@ -26,7 +26,7 @@ function pagerCmd(): string[] {
     if (NodePolyFillBun.file(less).size) return [less, ...lessOptions]
   }
 
-  const git = Bun.which("git")
+  const git = NodePolyFillBun.which("git")
   if (git) {
     const less = path.join(git, "..", "..", "usr", "bin", "less.exe")
     if (NodePolyFillBun.file(less).size) return [less, ...lessOptions]
@@ -87,7 +87,7 @@ export const SessionListCommand = cmd({
       const shouldPaginate = process.stdout.isTTY && !args.maxCount && args.format === "table"
 
       if (shouldPaginate) {
-        const proc = Bun.spawn({
+        const proc = NodePolyFillBun.spawn({
           cmd: pagerCmd(),
           stdin: "pipe",
           stdout: "inherit",

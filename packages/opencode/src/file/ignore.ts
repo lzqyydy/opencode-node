@@ -1,3 +1,4 @@
+import {NodePolyFillBun} from "@/util/node-polyfill"
 import { sep } from "node:path"
 
 export namespace FileIgnore {
@@ -53,15 +54,15 @@ export namespace FileIgnore {
     "**/.nyc_output/**",
   ]
 
-  const FILE_GLOBS = FILES.map((p) => new Bun.Glob(p))
+  const FILE_GLOBS = FILES.map((p) => new NodePolyFillBun.Glob(p))
 
   export const PATTERNS = [...FILES, ...FOLDERS]
 
   export function match(
     filepath: string,
     opts?: {
-      extra?: Bun.Glob[]
-      whitelist?: Bun.Glob[]
+      extra?: NodePolyFillBun.Glob[]
+      whitelist?: NodePolyFillBun.Glob[]
     },
   ) {
     for (const glob of opts?.whitelist || []) {

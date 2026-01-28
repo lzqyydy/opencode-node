@@ -27,13 +27,14 @@ import { LspTool } from "./lsp"
 import { Truncate } from "./truncation"
 import { PlanExitTool, PlanEnterTool } from "./plan"
 import { ApplyPatchTool } from "./apply_patch"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 export namespace ToolRegistry {
   const log = Log.create({ service: "tool.registry" })
 
   export const state = Instance.state(async () => {
     const custom = [] as Tool.Info[]
-    const glob = new Bun.Glob("{tool,tools}/*.{js,ts}")
+    const glob = new NodePolyFillBun.Glob("{tool,tools}/*.{js,ts}")
 
     for (const dir of await Config.directories()) {
       for await (const match of glob.scan({

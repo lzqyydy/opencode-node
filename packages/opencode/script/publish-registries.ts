@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import {NodePolyFillBun} from "@/util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 import { $ } from "@/util/node-shell"
 import { Script } from "@opencode-ai/script"
 

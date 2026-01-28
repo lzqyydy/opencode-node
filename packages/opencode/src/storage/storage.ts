@@ -8,7 +8,7 @@ import { Lock } from "../util/lock"
 import { $ } from "@/util/node-shell"
 import { NamedError } from "@opencode-ai/util/error"
 import z from "zod"
-import { NodePolyFillBun } from "../util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 export namespace Storage {
   const log = Log.create({ service: "storage" })
@@ -26,7 +26,7 @@ export namespace Storage {
     async (dir) => {
       const project = path.resolve(dir, "../project")
       if (!(await Filesystem.isDir(project))) return
-      for await (const projectDir of new Bun.Glob("*").scan({
+      for await (const projectDir of new NodePolyFillBun.Glob("*").scan({
         cwd: project,
         onlyFiles: false,
       })) {
@@ -36,7 +36,7 @@ export namespace Storage {
         let worktree = "/"
 
         if (projectID !== "global") {
-          for await (const msgFile of new Bun.Glob("storage/session/message/*/*.json").scan({
+          for await (const msgFile of new NodePolyFillBun.Glob("storage/session/message/*/*.json").scan({
             cwd: path.join(project, projectDir),
             absolute: true,
           })) {
@@ -75,7 +75,7 @@ export namespace Storage {
           )
 
           log.info(`migrating sessions for project ${projectID}`)
-          for await (const sessionFile of new Bun.Glob("storage/session/info/*.json").scan({
+          for await (const sessionFile of new NodePolyFillBun.Glob("storage/session/info/*.json").scan({
             cwd: fullProjectDir,
             absolute: true,
           })) {
@@ -87,7 +87,7 @@ export namespace Storage {
             const session = await NodePolyFillBun.file(sessionFile).json()
             await NodePolyFillBun.write(dest, JSON.stringify(session))
             log.info(`migrating messages for session ${session.id}`)
-            for await (const msgFile of new Bun.Glob(`storage/session/message/${session.id}/*.json`).scan({
+            for await (const msgFile of new NodePolyFillBun.Glob(`storage/session/message/${session.id}/*.json`).scan({
               cwd: fullProjectDir,
               absolute: true,
             })) {
@@ -100,7 +100,7 @@ export namespace Storage {
               await NodePolyFillBun.write(dest, JSON.stringify(message))
 
               log.info(`migrating parts for message ${message.id}`)
-              for await (const partFile of new Bun.Glob(`storage/session/part/${session.id}/${message.id}/*.json`).scan(
+              for await (const partFile of new NodePolyFillBun.Glob(`storage/session/part/${session.id}/${message.id}/*.json`).scan(
                 {
                   cwd: fullProjectDir,
                   absolute: true,
@@ -120,7 +120,7 @@ export namespace Storage {
       }
     },
     async (dir) => {
-      for await (const item of new Bun.Glob("session/*/*.json").scan({
+      for await (const item of new NodePolyFillBun.Glob("session/*/*.json").scan({
         cwd: dir,
         absolute: true,
       })) {
@@ -209,7 +209,7 @@ export namespace Storage {
     })
   }
 
-  const glob = new Bun.Glob("**/*")
+  const glob = new NodePolyFillBun.Glob("**/*")
   export async function list(prefix: string[]) {
     const dir = await state().then((x) => x.dir)
     try {

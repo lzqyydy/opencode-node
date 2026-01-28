@@ -3,7 +3,7 @@ import { createSignal, type Setter } from "solid-js"
 import { createStore } from "solid-js/store"
 import { createSimpleContext } from "./helper"
 import path from "path"
-import {NodePolyFillBun} from "@/util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 export const { use: useKV, provider: KVProvider } = createSimpleContext({
   name: "KV",

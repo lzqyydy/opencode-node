@@ -13,7 +13,7 @@ import { BusEvent } from "@/bus/bus-event"
 import { iife } from "@/util/iife"
 import { GlobalBus } from "@/bus/global"
 import { existsSync } from "fs"
-import { NodePolyFillBun } from "../util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 export namespace Project {
   const log = Log.create({ service: "project" })
@@ -56,7 +56,7 @@ export namespace Project {
       if (git) {
         let sandbox = path.dirname(git)
 
-        const gitBinary = Bun.which("git")
+        const gitBinary = NodePolyFillBun.which("git")
 
         // cached id calculation
         let id = await NodePolyFillBun.file(path.join(git, "opencode"))
@@ -218,7 +218,7 @@ export namespace Project {
     if (input.vcs !== "git") return
     if (input.icon?.override) return
     if (input.icon?.url) return
-    const glob = new Bun.Glob("**/{favicon}.{ico,png,svg,jpg,jpeg,webp}")
+    const glob = new NodePolyFillBun.Glob("**/{favicon}.{ico,png,svg,jpg,jpeg,webp}")
     const matches = await Array.fromAsync(
       glob.scan({
         cwd: input.worktree,

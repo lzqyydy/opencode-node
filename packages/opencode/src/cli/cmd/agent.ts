@@ -10,7 +10,7 @@ import matter from "gray-matter"
 import { Instance } from "../../project/instance"
 import { EOL } from "os"
 import type { Argv } from "yargs"
-import {NodePolyFillBun} from "@/util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 type AgentMode = "all" | "primary" | "subagent"
 

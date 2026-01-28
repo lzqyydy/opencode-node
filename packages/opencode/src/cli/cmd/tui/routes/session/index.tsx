@@ -74,7 +74,7 @@ import { PermissionPrompt } from "./permission"
 import { QuestionPrompt } from "./question"
 import { DialogExportOptions } from "../../ui/dialog-export-options"
 import { formatTranscript } from "../../util/transcript"
-import {NodePolyFillBun} from "@/util/node-files.ts"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 addDefaultParsers(parsers.parsers)
 

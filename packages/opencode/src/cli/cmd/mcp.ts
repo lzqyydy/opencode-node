@@ -14,7 +14,7 @@ import path from "path"
 import { Global } from "../../global"
 import { modify, applyEdits } from "jsonc-parser"
 import { Bus } from "../../bus"
-import {NodePolyFillBun} from "@/util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 function getAuthStatusIcon(status: MCP.AuthStatus): string {
   switch (status) {

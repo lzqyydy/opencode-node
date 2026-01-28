@@ -16,7 +16,7 @@ import { Filesystem } from "../util/filesystem"
 import { Instance } from "../project/instance"
 import { Snapshot } from "@/snapshot"
 import { assertExternalDirectory } from "./external-directory"
-import { NodePolyFillBun } from "../util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 const MAX_DIAGNOSTICS_PER_FILE = 20
 

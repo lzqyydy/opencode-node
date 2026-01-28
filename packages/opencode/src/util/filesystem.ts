@@ -1,6 +1,6 @@
 import { realpathSync } from "fs"
 import { dirname, join, relative } from "path"
-import {NodePolyFillBun} from "./node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 export namespace Filesystem {
   export const exists = (p: string) =>
@@ -71,7 +71,7 @@ export namespace Filesystem {
     const result = []
     while (true) {
       try {
-        const glob = new Bun.Glob(pattern)
+        const glob = new NodePolyFillBun.Glob(pattern)
         for await (const match of glob.scan({
           cwd: current,
           absolute: true,

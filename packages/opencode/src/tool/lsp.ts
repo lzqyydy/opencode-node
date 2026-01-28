@@ -6,7 +6,7 @@ import DESCRIPTION from "./lsp.txt"
 import { Instance } from "../project/instance"
 import { pathToFileURL } from "url"
 import { assertExternalDirectory } from "./external-directory"
-import { NodePolyFillBun } from "../util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 const operations = [
   "goToDefinition",

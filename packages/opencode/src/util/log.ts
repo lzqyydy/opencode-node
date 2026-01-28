@@ -2,7 +2,7 @@ import path from "path"
 import fs from "fs/promises"
 import { Global } from "../global"
 import z from "zod"
-import {NodePolyFillBun} from "./node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 export namespace Log {
   export const Level = z.enum(["DEBUG", "INFO", "WARN", "ERROR"]).meta({ ref: "LogLevel", description: "Log level" })
@@ -75,7 +75,7 @@ export namespace Log {
   }
 
   async function cleanup(dir: string) {
-    const glob = new Bun.Glob("????-??-??T??????.log")
+    const glob = new NodePolyFillBun.Glob("????-??-??T??????.log")
     const files = await Array.fromAsync(
       glob.scan({
         cwd: dir,

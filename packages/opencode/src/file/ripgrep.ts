@@ -9,7 +9,8 @@ import { $ } from "@/util/node-shell"
 
 import { ZipReader, BlobReader, BlobWriter } from "@zip.js/zip.js"
 import { Log } from "@/util/log"
-import {NodePolyFillBun} from "@/util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
+import {readableStreamToText} from "@/util/node-utils"
 
 export namespace Ripgrep {
   const log = Log.create({ service: "ripgrep" })
@@ -124,7 +125,7 @@ export namespace Ripgrep {
   )
 
   const state = lazy(async () => {
-    let filepath = Bun.which("rg")
+    let filepath = NodePolyFillBun.which("rg")
     if (filepath) return { filepath }
     filepath = path.join(Global.Path.bin, "rg" + (process.platform === "win32" ? ".exe" : ""))
 
@@ -150,7 +151,7 @@ export namespace Ripgrep {
         if (platformKey.endsWith("-darwin")) args.push("--include=*/rg")
         if (platformKey.endsWith("-linux")) args.push("--wildcards", "*/rg")
 
-        const proc = Bun.spawn(args, {
+        const proc = NodePolyFillBun.spawn(args, {
           cwd: Global.Path.bin,
           stderr: "pipe",
           stdout: "pipe",
@@ -159,7 +160,7 @@ export namespace Ripgrep {
         if (proc.exitCode !== 0)
           throw new ExtractionFailedError({
             filepath,
-            stderr: await Bun.readableStreamToText(proc.stderr),
+            stderr: await readableStreamToText(proc.stderr),
           })
       }
       if (config.extension === "zip") {
@@ -231,7 +232,7 @@ export namespace Ripgrep {
       })
     }
 
-    const proc = Bun.spawn(args, {
+    const proc = NodePolyFillBun.spawn(args, {
       cwd: input.cwd,
       stdout: "pipe",
       stderr: "ignore",

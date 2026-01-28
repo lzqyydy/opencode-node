@@ -27,7 +27,7 @@ import { Bus } from "../../bus"
 import { MessageV2 } from "../../session/message-v2"
 import { SessionPrompt } from "@/session/prompt"
 import { $ } from "@/util/node-shell"
-import {NodePolyFillBun} from "@/util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 type GitHubAuthor = {
   login: string
@@ -349,7 +349,7 @@ export const GithubInstallCommand = cmd({
               }
 
               retries++
-              await Bun.sleep(1000)
+              await NodePolyFillBun.sleep(1000)
             } while (true)
 
             s.stop("Installed GitHub app")
@@ -1290,7 +1290,7 @@ Co-authored-by: ${actor} <${actor}@users.noreply.github.com>"`
         } catch (e) {
           if (retries > 0) {
             console.log(`Retrying after ${delayMs}ms...`)
-            await Bun.sleep(delayMs)
+            await NodePolyFillBun.sleep(delayMs)
             return withRetry(fn, retries - 1, delayMs)
           }
           throw e

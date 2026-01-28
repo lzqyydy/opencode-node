@@ -4,7 +4,7 @@ import clipboardy from "clipboardy"
 import { lazy } from "../../../../util/lazy.js"
 import { tmpdir } from "os"
 import path from "path"
-import {NodePolyFillBun} from "@/util/node-files.js"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 /**
  * Writes text to clipboard via OSC 52 escape sequence.
@@ -77,7 +77,7 @@ export namespace Clipboard {
   const getCopyMethod = lazy(() => {
     const os = platform()
 
-    if (os === "darwin" && Bun.which("osascript")) {
+    if (os === "darwin" && NodePolyFillBun.which("osascript")) {
       console.log("clipboard: using osascript")
       return async (text: string) => {
         const escaped = text.replace(/\\/g, "\\\\").replace(/"/g, '\\"')
@@ -86,19 +86,19 @@ export namespace Clipboard {
     }
 
     if (os === "linux") {
-      if (process.env["WAYLAND_DISPLAY"] && Bun.which("wl-copy")) {
+      if (process.env["WAYLAND_DISPLAY"] && NodePolyFillBun.which("wl-copy")) {
         console.log("clipboard: using wl-copy")
         return async (text: string) => {
-          const proc = Bun.spawn(["wl-copy"], { stdin: "pipe", stdout: "ignore", stderr: "ignore" })
+          const proc = NodePolyFillBun.spawn(["wl-copy"], { stdin: "pipe", stdout: "ignore", stderr: "ignore" })
           proc.stdin.write(text)
           proc.stdin.end()
           await proc.exited.catch(() => {})
         }
       }
-      if (Bun.which("xclip")) {
+      if (NodePolyFillBun.which("xclip")) {
         console.log("clipboard: using xclip")
         return async (text: string) => {
-          const proc = Bun.spawn(["xclip", "-selection", "clipboard"], {
+          const proc = NodePolyFillBun.spawn(["xclip", "-selection", "clipboard"], {
             stdin: "pipe",
             stdout: "ignore",
             stderr: "ignore",
@@ -108,10 +108,10 @@ export namespace Clipboard {
           await proc.exited.catch(() => {})
         }
       }
-      if (Bun.which("xsel")) {
+      if (NodePolyFillBun.which("xsel")) {
         console.log("clipboard: using xsel")
         return async (text: string) => {
-          const proc = Bun.spawn(["xsel", "--clipboard", "--input"], {
+          const proc = NodePolyFillBun.spawn(["xsel", "--clipboard", "--input"], {
             stdin: "pipe",
             stdout: "ignore",
             stderr: "ignore",
@@ -127,7 +127,7 @@ export namespace Clipboard {
       console.log("clipboard: using powershell")
       return async (text: string) => {
         // Pipe via stdin to avoid PowerShell string interpolation ($env:FOO, $(), etc.)
-        const proc = Bun.spawn(
+        const proc = NodePolyFillBun.spawn(
           [
             "powershell.exe",
             "-NonInteractive",

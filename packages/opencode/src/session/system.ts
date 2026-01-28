@@ -7,7 +7,7 @@ import { Log } from "../util/log"
 import { Instance } from "../project/instance"
 import path from "path"
 import os from "os"
-import { NodePolyFillBun } from "../util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 import PROMPT_ANTHROPIC from "./prompt/anthropic.txt"
 import PROMPT_ANTHROPIC_WITHOUT_TODO from "./prompt/qwen.txt"
@@ -127,7 +127,7 @@ export namespace SystemPrompt {
         let matches: string[] = []
         if (path.isAbsolute(instruction)) {
           matches = await Array.fromAsync(
-            new Bun.Glob(path.basename(instruction)).scan({
+            new NodePolyFillBun.Glob(path.basename(instruction)).scan({
               cwd: path.dirname(instruction),
               absolute: true,
               onlyFiles: true,

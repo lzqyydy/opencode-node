@@ -1,4 +1,4 @@
-import {NodePolyFillBun} from "@/util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 import { Global } from "../global"
 
 export async function data() {

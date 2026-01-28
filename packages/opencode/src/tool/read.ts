@@ -8,7 +8,7 @@ import DESCRIPTION from "./read.txt"
 import { Instance } from "../project/instance"
 import { Identifier } from "../id/id"
 import { assertExternalDirectory } from "./external-directory"
-import { NodePolyFillBun, type NodeBunFile } from "../util/node-files"
+import { NodePolyFillBun, type NodeBunFile } from "../util/node-polyfill"
 
 const DEFAULT_READ_LIMIT = 2000
 const MAX_LINE_LENGTH = 2000

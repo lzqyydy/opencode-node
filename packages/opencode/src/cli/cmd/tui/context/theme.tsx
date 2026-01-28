@@ -42,7 +42,7 @@ import { createStore, produce } from "solid-js/store"
 import { Global } from "@/global"
 import { Filesystem } from "@/util/filesystem"
 import { useSDK } from "./sdk"
-import {NodePolyFillBun} from "@/util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 type ThemeColors = {
   primary: RGBA
@@ -393,7 +393,7 @@ export const { use: useTheme, provider: ThemeProvider } = createSimpleContext({
   },
 })
 
-const CUSTOM_THEME_GLOB = new Bun.Glob("themes/*.json")
+const CUSTOM_THEME_GLOB = new NodePolyFillBun.Glob("themes/*.json")
 async function getCustomThemes() {
   const directories = [
     Global.Path.config,

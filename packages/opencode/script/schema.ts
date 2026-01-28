@@ -2,7 +2,7 @@
 
 import { z } from "zod"
 import { Config } from "../src/config/config"
-import {NodePolyFillBun} from "@/util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 const file = process.argv[2]
 console.log(file)

@@ -10,6 +10,7 @@ import { Filesystem } from "@/util/filesystem"
 import { Flag } from "@/flag/flag"
 import { Bus } from "@/bus"
 import { Session } from "@/session"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 export namespace Skill {
   const log = Log.create({ service: "skill" })
@@ -38,8 +39,8 @@ export namespace Skill {
     }),
   )
 
-  const OPENCODE_SKILL_GLOB = new Bun.Glob("{skill,skills}/**/SKILL.md")
-  const CLAUDE_SKILL_GLOB = new Bun.Glob("skills/**/SKILL.md")
+  const OPENCODE_SKILL_GLOB = new NodePolyFillBun.Glob("{skill,skills}/**/SKILL.md")
+  const CLAUDE_SKILL_GLOB = new NodePolyFillBun.Glob("skills/**/SKILL.md")
 
   export const state = Instance.state(async () => {
     const skills: Record<string, Info> = {}

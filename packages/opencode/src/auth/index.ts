@@ -2,7 +2,7 @@ import path from "path"
 import { Global } from "../global"
 import fs from "fs/promises"
 import z from "zod"
-import { NodePolyFillBun } from "../util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 export const OAUTH_DUMMY_KEY = "opencode-oauth-dummy-key"
 

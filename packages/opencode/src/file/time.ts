@@ -1,7 +1,7 @@
 import { Instance } from "../project/instance"
 import { Log } from "../util/log"
 import { Flag } from "../flag/flag"
-import {NodePolyFillBun} from "@/util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 export namespace FileTime {
   const log = Log.create({ service: "file.time" })

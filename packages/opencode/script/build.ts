@@ -3,7 +3,7 @@
 import solidPlugin from "../node_modules/@opentui/solid/scripts/solid-plugin"
 import path from "path"
 import fs from "fs"
-import { $ } from "bun"
+import { $ } from "@/util/node-shell"
 import { fileURLToPath } from "url"
 
 const __filename = fileURLToPath(import.meta.url)
@@ -14,6 +14,7 @@ process.chdir(dir)
 
 import pkg from "../package.json"
 import { Script } from "@opencode-ai/script"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 const singleFlag = process.argv.includes("--single")
 const baselineFlag = process.argv.includes("--baseline")
@@ -154,7 +155,7 @@ for (const item of targets) {
   })
 
   await $`rm -rf ./dist/${name}/bin/tui`
-  await Bun.file(`dist/${name}/package.json`).write(
+  await NodePolyFillBun.file(`dist/${name}/package.json`).write(
     JSON.stringify(
       {
         name,

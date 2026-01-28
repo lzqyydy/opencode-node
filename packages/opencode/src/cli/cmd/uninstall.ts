@@ -7,7 +7,7 @@ import { $ } from "@/util/node-shell"
 import fs from "fs/promises"
 import path from "path"
 import os from "os"
-import {NodePolyFillBun} from "@/util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 interface UninstallArgs {
   keepConfig: boolean

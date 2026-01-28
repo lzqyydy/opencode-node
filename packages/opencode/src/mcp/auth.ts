@@ -2,7 +2,7 @@ import path from "path"
 import fs from "fs/promises"
 import z from "zod"
 import { Global } from "../global"
-import { NodePolyFillBun } from "../util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 export namespace McpAuth {
   export const Tokens = z.object({

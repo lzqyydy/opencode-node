@@ -6,7 +6,7 @@ import DESCRIPTION from "./grep.txt"
 import { Instance } from "../project/instance"
 import path from "path"
 import { assertExternalDirectory } from "./external-directory"
-import { NodePolyFillBun } from "../util/node-files"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 const MAX_LINE_LENGTH = 2000
 
@@ -52,7 +52,7 @@ export const GrepTool = Tool.define("grep", {
     }
     args.push(searchPath)
 
-    const proc = Bun.spawn([rgPath, ...args], {
+    const proc = NodePolyFillBun.spawn([rgPath, ...args], {
       stdout: "pipe",
       stderr: "pipe",
     })

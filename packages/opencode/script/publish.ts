@@ -3,7 +3,7 @@ import { $ } from "@/util/node-shell"
 import pkg from "../package.json"
 import { Script } from "@opencode-ai/script"
 import { fileURLToPath } from "url"
-import {NodePolyFillBun} from "@/util/node-files.ts"
+import {NodePolyFillBun} from "@/util/node-polyfill"
 
 const dir = fileURLToPath(new URL("..", import.meta.url))
 process.chdir(dir)
