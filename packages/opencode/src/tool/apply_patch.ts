@@ -11,7 +11,7 @@ import { assertExternalDirectory } from "./external-directory"
 import { trimDiff } from "./edit"
 import { LSP } from "../lsp"
 import { Filesystem } from "../util/filesystem"
-import DESCRIPTION from "./apply_patch.txt"
+import DESCRIPTION from "./apply_patch.txt.ts"
 import { File } from "../file"
 
 const PatchParams = z.object({

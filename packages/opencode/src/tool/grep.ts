@@ -2,7 +2,7 @@ import z from "zod"
 import { Tool } from "./tool"
 import { Ripgrep } from "../file/ripgrep"
 
-import DESCRIPTION from "./grep.txt"
+import DESCRIPTION from "./grep.txt.ts"
 import { Instance } from "../project/instance"
 import path from "path"
 import { assertExternalDirectory } from "./external-directory"
