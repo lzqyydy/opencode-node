@@ -39,10 +39,12 @@ interface ShellOptions {
  * ShellPromise - 支持链式配置的懒执行 Promise
  */
 export interface ShellPromise extends Promise<ShellOutput> {
+    /** 标准输入流 */
+    readonly stdin: WritableStream;
     /** 设置工作目录 */
     cwd(path: string): ShellPromise;
     /** 设置环境变量 */
-    env(env: Record<string, string | undefined>): ShellPromise;
+    env(env: Record<string, string> | undefined): ShellPromise;
     /** 静默模式，不输出到控制台 */
     quiet(): ShellPromise;
     /** 按行返回输出 */
@@ -180,7 +182,23 @@ function createShellPromise(command: string, options: ShellOptions = {}): ShellP
         return cachedPromise;
     };
 
+    // 创建一个用于 stdin 的 WritableStream
+    // 注意：由于当前实现使用 'inherit' 作为 stdin，此 stream 主要用于类型兼容
+    const stdinStream = new WritableStream({
+        write(_chunk) {
+            // 在当前实现中，stdin 使用 'inherit' 模式
+            // 如果需要写入数据到进程，需要修改 executeCommand 的实现
+            return Promise.resolve();
+        },
+        close() {
+            return Promise.resolve();
+        },
+    });
+
     const shellPromise: ShellPromise = {
+        // stdin 流
+        stdin: stdinStream,
+
         // Promise 接口实现
         then<TResult1 = ShellOutput, TResult2 = never>(
             onfulfilled?: ((value: ShellOutput) => TResult1 | PromiseLike<TResult1>) | null,
@@ -206,7 +224,7 @@ function createShellPromise(command: string, options: ShellOptions = {}): ShellP
             return createShellPromise(command, { ...options, cwd: path });
         },
 
-        env(env: Record<string, string | undefined>): ShellPromise {
+        env(env: Record<string, string> | undefined): ShellPromise {
             return createShellPromise(command, {
                 ...options,
                 env: { ...options.env, ...env },
@@ -334,5 +352,173 @@ $.create = function (defaultOptions: ShellOptions) {
 };
 
 $.ShellError = ShellError;
+
+/**
+ * Perform bash-like brace expansion on the given pattern.
+ * @example
+ * $.braces("file{1,2,3}.txt") // ["file1.txt", "file2.txt", "file3.txt"]
+ * $.braces("{a,b}{1,2}") // ["a1", "a2", "b1", "b2"]
+ */
+$.braces = function (pattern: string): string[] {
+    const results: string[] = [];
+
+    function expand(str: string): string[] {
+        // Find the first brace group
+        const braceStart = str.indexOf("{");
+        if (braceStart === -1) {
+            return [str];
+        }
+
+        // Find matching closing brace
+        let depth = 0;
+        let braceEnd = -1;
+        for (let i = braceStart; i < str.length; i++) {
+            if (str[i] === "{") depth++;
+            if (str[i] === "}") {
+                depth--;
+                if (depth === 0) {
+                    braceEnd = i;
+                    break;
+                }
+            }
+        }
+
+        if (braceEnd === -1) {
+            return [str];
+        }
+
+        const prefix = str.slice(0, braceStart);
+        const suffix = str.slice(braceEnd + 1);
+        const braceContent = str.slice(braceStart + 1, braceEnd);
+
+        // Split by comma (but respect nested braces)
+        const alternatives: string[] = [];
+        let current = "";
+        let nestedDepth = 0;
+        for (const char of braceContent) {
+            if (char === "{") nestedDepth++;
+            if (char === "}") nestedDepth--;
+            if (char === "," && nestedDepth === 0) {
+                alternatives.push(current);
+                current = "";
+            } else {
+                current += char;
+            }
+        }
+        alternatives.push(current);
+
+        // Expand each alternative and recurse
+        const expanded: string[] = [];
+        for (const alt of alternatives) {
+            const combined = prefix + alt + suffix;
+            expanded.push(...expand(combined));
+        }
+
+        return expanded;
+    }
+
+    results.push(...expand(pattern));
+    return results;
+};
+
+/**
+ * Escape strings for input into shell commands.
+ */
+$.escape = function (input: string): string {
+    if (process.platform === "win32") {
+        // Windows: 使用双引号并转义内部双引号
+        return `"${input.replace(/"/g, '""')}"`;
+    }
+    // Unix: 使用单引号并处理内部单引号
+    return `'${input.replace(/'/g, "'\\''")}'`;
+};
+
+/**
+ * Change the default environment variables for shells created by this instance.
+ */
+$.env = function (newEnv?: Record<string, string | undefined>) {
+    return createBunShell({ env: newEnv });
+};
+
+/**
+ * Default working directory to use for shells created by this instance.
+ */
+$.cwd = function (newCwd?: string) {
+    return createBunShell({ cwd: newCwd });
+};
+
+/**
+ * Configure the shell to not throw an exception on non-zero exit codes.
+ */
+$.nothrow = function () {
+    return createBunShell({ throws: false });
+};
+
+/**
+ * Configure whether or not the shell should throw an exception on non-zero exit codes.
+ */
+$.throws = function (shouldThrow: boolean) {
+    return createBunShell({ throws: shouldThrow });
+};
+
+/**
+ * BunShell 类型定义
+ */
+export type BunShell = typeof $ & {
+    braces(pattern: string): string[];
+    escape(input: string): string;
+    env(newEnv?: Record<string, string | undefined>): BunShell;
+    cwd(newCwd?: string): BunShell;
+    nothrow(): BunShell;
+    throws(shouldThrow: boolean): BunShell;
+};
+
+/**
+ * 创建带有默认选项的 BunShell 实例
+ */
+function createBunShell(defaultOptions: ShellOptions = {}): BunShell {
+    const shell = function (strings: TemplateStringsArray, ...values: unknown[]): ShellPromise {
+        let command = strings[0];
+        for (let i = 0; i < values.length; i++) {
+            command += escapeShellArg(values[i]) + strings[i + 1];
+        }
+        return createShellPromise(command, defaultOptions);
+    };
+
+    shell.create = $.create;
+    shell.ShellError = ShellError;
+    shell.braces = $.braces;
+    shell.escape = $.escape;
+
+    shell.env = function (newEnv?: Record<string, string | undefined>) {
+        return createBunShell({
+            ...defaultOptions,
+            env: { ...defaultOptions.env, ...newEnv },
+        });
+    };
+
+    shell.cwd = function (newCwd?: string) {
+        return createBunShell({
+            ...defaultOptions,
+            cwd: newCwd ?? defaultOptions.cwd,
+        });
+    };
+
+    shell.nothrow = function () {
+        return createBunShell({
+            ...defaultOptions,
+            throws: false,
+        });
+    };
+
+    shell.throws = function (shouldThrow: boolean) {
+        return createBunShell({
+            ...defaultOptions,
+            throws: shouldThrow,
+        });
+    };
+
+    return shell as BunShell;
+}
 
 export default $;

@@ -11,6 +11,7 @@ import { CodexAuthPlugin } from "./codex"
 import { Session } from "../session"
 import { NamedError } from "@opencode-ai/util/error"
 import { CopilotAuthPlugin } from "./copilot"
+import { $ as NodePolyFillBun$ } from '@/util/node-shell';
 
 export namespace Plugin {
   const log = Log.create({ service: "plugin" })
@@ -34,7 +35,7 @@ export namespace Plugin {
       worktree: Instance.worktree,
       directory: Instance.directory,
       serverUrl: Server.url(),
-      $: Bun.$,
+      $: NodePolyFillBun$,
     }
 
     for (const plugin of INTERNAL_PLUGINS) {
