@@ -984,7 +984,7 @@ export namespace Provider {
 
       const customFetch = options["fetch"]
 
-      options["fetch"] = async (input: any, init?: BunFetchRequestInit) => {
+      options["fetch"] = async (input: any, init?: any) => {
         // Preserve custom fetch if it exists, wrap it with timeout logic
         const fetchFn = customFetch ?? fetch
         const opts = init ?? {}

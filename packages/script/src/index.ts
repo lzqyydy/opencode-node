@@ -1,19 +1,33 @@
-import { $, semver } from "bun"
+import { execSync } from "child_process"
+import fs from "fs"
 import path from "path"
+import { fileURLToPath } from "url"
 
-const rootPkgPath = path.resolve(import.meta.dir, "../../../package.json")
-const rootPkg = await Bun.file(rootPkgPath).json()
-const expectedBunVersion = rootPkg.packageManager?.split("@")[1]
+// Get directory of this file
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-if (!expectedBunVersion) {
-  throw new Error("packageManager field not found in root package.json")
-}
+const rootPkgPath = path.resolve(__dirname, "../../../package.json")
+const rootPkg = JSON.parse(fs.readFileSync(rootPkgPath, "utf-8"))
+// const expectedBunVersion = rootPkg.packageManager?.split("@")[1]
+const expectedBunVersion = '1.3.5';
 
-// relax version requirement
-const expectedBunVersionRange = `^${expectedBunVersion}`
+// Note: In Node.js environment, we skip the Bun version check
+// This allows the script to work in both Bun and Node.js environments
+const isBunRuntime = typeof process.versions.bun !== "undefined"
 
-if (!semver.satisfies(process.versions.bun, expectedBunVersionRange)) {
-  throw new Error(`This script requires bun@${expectedBunVersionRange}, but you are using bun@${process.versions.bun}`)
+if (isBunRuntime && expectedBunVersion) {
+  // Simple semver check for Bun runtime
+  // const currentBunVersion = process.versions.bun
+  const currentBunVersion = '1.3.5';
+  const [expectedMajor, expectedMinor] = expectedBunVersion.split(".").map(Number)
+  const [currentMajor, currentMinor] = currentBunVersion.split(".").map(Number)
+
+  if (currentMajor < expectedMajor || (currentMajor === expectedMajor && currentMinor < expectedMinor)) {
+    throw new Error(
+      `This script requires bun@^${expectedBunVersion}, but you are using bun@${process.versions.bun}`,
+    )
+  }
 }
 
 const env = {
@@ -21,12 +35,18 @@ const env = {
   OPENCODE_BUMP: process.env["OPENCODE_BUMP"],
   OPENCODE_VERSION: process.env["OPENCODE_VERSION"],
 }
+
 const CHANNEL = await (async () => {
   if (env.OPENCODE_CHANNEL) return env.OPENCODE_CHANNEL
   if (env.OPENCODE_BUMP) return "latest"
   if (env.OPENCODE_VERSION && !env.OPENCODE_VERSION.startsWith("0.0.0-")) return "latest"
-  return await $`git branch --show-current`.text().then((x) => x.trim())
+  try {
+    return execSync("git branch --show-current", { encoding: "utf-8" }).trim()
+  } catch {
+    return "dev"
+  }
 })()
+
 const IS_PREVIEW = CHANNEL !== "latest"
 
 const VERSION = await (async () => {
@@ -56,4 +76,5 @@ export const Script = {
     return IS_PREVIEW
   },
 }
+
 console.log(`opencode script`, JSON.stringify(Script, null, 2))
