@@ -23,7 +23,7 @@ export const { use: useSDK, provider: SDKProvider } = createSimpleContext({
     }>()
 
     let queue: Event[] = []
-    let timer: number | undefined
+    let timer: NodeJS.Timeout | undefined
     let last = 0
 
     const flush = () => {

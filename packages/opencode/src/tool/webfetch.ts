@@ -1,6 +1,7 @@
 import z from "zod"
 import { Tool } from "./tool"
 import TurndownService from "turndown"
+import { Parser } from "htmlparser2"
 import DESCRIPTION from "./webfetch.txt.ts"
 
 const MAX_RESPONSE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -107,7 +108,7 @@ export const WebFetchTool = Tool.define("webfetch", {
 
       case "text":
         if (contentType.includes("text/html")) {
-          const text = await extractTextFromHTML(content)
+          const text = extractTextFromHTML(content)
           return {
             output: text,
             title,
@@ -137,35 +138,32 @@ export const WebFetchTool = Tool.define("webfetch", {
   },
 })
 
-async function extractTextFromHTML(html: string) {
+function extractTextFromHTML(html: string): string {
   let text = ""
-  let skipContent = false
+  const skipTags = new Set(["script", "style", "noscript", "iframe", "object", "embed"])
+  const skipStack: string[] = []
 
-  const rewriter = new HTMLRewriter()
-    .on("script, style, noscript, iframe, object, embed", {
-      element() {
-        skipContent = true
-      },
-      text() {
-        // Skip text content inside these elements
-      },
-    })
-    .on("*", {
-      element(element) {
-        // Reset skip flag when entering other elements
-        if (!["script", "style", "noscript", "iframe", "object", "embed"].includes(element.tagName)) {
-          skipContent = false
-        }
-      },
-      text(input) {
-        if (!skipContent) {
-          text += input.text
-        }
-      },
-    })
-    .transform(new Response(html))
+  const parser = new Parser({
+    onopentag(name) {
+      if (skipTags.has(name)) {
+        skipStack.push(name)
+      }
+    },
+    ontext(content) {
+      if (skipStack.length === 0) {
+        text += content
+      }
+    },
+    onclosetag(name) {
+      if (skipTags.has(name) && skipStack.length > 0 && skipStack[skipStack.length - 1] === name) {
+        skipStack.pop()
+      }
+    },
+  })
 
-  await rewriter.text()
+  parser.write(html)
+  parser.end()
+
   return text.trim()
 }
 
