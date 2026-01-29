@@ -214,7 +214,6 @@ export namespace Server {
             },
           }),
           async (c) => {
-            console.log('entering /path')
             return c.json({
               home: Global.Path.home,
               state: Global.Path.state,

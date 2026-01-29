@@ -15,10 +15,10 @@ export namespace BunProc {
 
   export async function run(cmd: string[], options?: NodeSpawnOptions) {
     log.info("running", {
-      cmd: [which(), ...cmd],
+      cmd,
       ...options,
     })
-    const result = NodePolyFillBun.spawn([which(), ...cmd], {
+    const result = NodePolyFillBun.spawn(cmd, {
       ...options,
       stdout: "pipe",
       stderr: "pipe",
@@ -87,6 +87,7 @@ export namespace BunProc {
 
     // Build command arguments (npm-compatible)
     const args = [
+      "npm",
       "install",
       "--force",
       "--save-exact",

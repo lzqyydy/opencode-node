@@ -33,7 +33,6 @@ export const GlobalRoutes = lazy(() =>
         },
       }),
       async (c) => {
-        console.log('entering /global/health')
         return c.json({ healthy: true, version: Installation.VERSION })
       },
     )

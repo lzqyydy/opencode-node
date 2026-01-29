@@ -1,6 +1,7 @@
 import {spawn as nodeSpawn, type SpawnOptions, type ChildProcess} from "child_process"
 import path from "path"
 import fs from "fs"
+import Stream from "stream"
 
 /**
  * Interface for spawn options similar to Bun.SpawnOptions
@@ -68,9 +69,9 @@ const noopReadableStream: ReadableStream<Uint8Array> = new ReadableStream({
 })
 
 /**
- * Convert Node.js Readable stream to Web ReadableStream
+ * Convert Node.js Stream.Readable to a ReadableStream
  */
-function nodeStreamToWebReadable(nodeStream: NodeJS.ReadableStream | null): ReadableStream<Uint8Array> | null {
+function nodeStreamReadableToReadableStream(nodeStream: Stream.Readable | null): ReadableStream<Uint8Array> | null {
   if (!nodeStream) return null
 
   return new ReadableStream({
@@ -198,20 +199,23 @@ export function spawn(cmdOrOptions: string[] | {cmd: string[]} & NodeSpawnOption
     })
   })
 
+  // 立即创建流，保证getter返回同一实例
+  const cachedStdin = createFileSink(childProcess.stdin) ?? noopFileSink
+  const cachedStdout = nodeStreamReadableToReadableStream(childProcess.stdout) ?? noopReadableStream
+  const cachedStderr = nodeStreamReadableToReadableStream(childProcess.stderr) ?? noopReadableStream
+
   const subprocess: NodeSubprocess = {
     get pid() {
       return childProcess.pid
     },
     get stdin() {
-      return createFileSink(childProcess.stdin) ?? noopFileSink
+      return cachedStdin
     },
     get stdout() {
-      return noopReadableStream
-      // return nodeStreamToWebReadable(childProcess.stdout) ?? noopReadableStream
+      return cachedStdout
     },
     get stderr() {
-      return noopReadableStream
-      // return nodeStreamToWebReadable(childProcess.stderr) ?? noopReadableStream
+      return cachedStderr
     },
     get exited() {
       return exitedPromise

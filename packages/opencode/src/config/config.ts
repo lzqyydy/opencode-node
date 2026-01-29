@@ -214,7 +214,7 @@ export namespace Config {
     if (!hasGitIgnore) await NodePolyFillBun.write(gitignore, ["node_modules", "package.json", "bun.lock", ".gitignore"].join("\n"))
 
     await BunProc.run(
-      ["install", "@opencode-ai/plugin@" + (Installation.isLocal() ? "latest" : Installation.VERSION), "--save-exact"],
+      ["npm", "install", "@opencode-ai/plugin@" + (Installation.isLocal() ? "latest" : Installation.VERSION), "--save-exact"],
       {
         cwd: dir,
       },
@@ -222,7 +222,7 @@ export namespace Config {
 
     // Install any additional dependencies defined in the package.json
     // This allows local plugins and custom tools to use external packages
-    await BunProc.run(["install"], { cwd: dir }).catch(() => {})
+    await BunProc.run(["npm", "install"], { cwd: dir }).catch(() => {})
   }
 
   function rel(item: string, patterns: string[]) {
