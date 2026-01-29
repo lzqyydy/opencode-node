@@ -206,10 +206,12 @@ export function spawn(cmdOrOptions: string[] | {cmd: string[]} & NodeSpawnOption
       return createFileSink(childProcess.stdin) ?? noopFileSink
     },
     get stdout() {
-      return nodeStreamToWebReadable(childProcess.stdout) ?? noopReadableStream
+      return noopReadableStream
+      // return nodeStreamToWebReadable(childProcess.stdout) ?? noopReadableStream
     },
     get stderr() {
-      return nodeStreamToWebReadable(childProcess.stderr) ?? noopReadableStream
+      return noopReadableStream
+      // return nodeStreamToWebReadable(childProcess.stderr) ?? noopReadableStream
     },
     get exited() {
       return exitedPromise

@@ -85,14 +85,14 @@ export namespace BunProc {
       process.env.https_proxy
     )
 
-    // Build command arguments
+    // Build command arguments (npm-compatible)
     const args = [
-      "add",
+      "install",
       "--force",
-      "--exact",
-      // TODO: get rid of this case (see: https://github.com/oven-sh/bun/issues/19936)
-      ...(proxied ? ["--no-cache"] : []),
-      "--cwd",
+      "--save-exact",
+      // Use --prefer-online when proxy is configured to avoid cache issues
+      ...(proxied ? ["--prefer-online"] : []),
+      "--prefix",
       Global.Path.cache,
       pkg + "@" + version,
     ]

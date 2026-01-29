@@ -32,7 +32,7 @@ import { lazy } from "../util/lazy"
 import { InstanceBootstrap } from "../project/bootstrap"
 import { Storage } from "../storage/storage"
 import type { ContentfulStatusCode } from "hono/utils/http-status"
-import { websocket } from "hono/bun"
+// import { websocket } from "hono/bun"
 import { HTTPException } from "hono/http-exception"
 import { errors } from "./error"
 import { QuestionRoutes } from "./routes/question"
@@ -214,6 +214,7 @@ export namespace Server {
             },
           }),
           async (c) => {
+            console.log('entering /path')
             return c.json({
               home: Global.Path.home,
               state: Global.Path.state,
@@ -514,21 +515,6 @@ export namespace Server {
         }) as unknown as Hono,
   )
 
-  export async function openapi() {
-    // Cast to break excessive type recursion from long route chains
-    const result = await generateSpecs(App() as Hono, {
-      documentation: {
-        info: {
-          title: "opencode",
-          version: "1.0.0",
-          description: "opencode api",
-        },
-        openapi: "3.1.1",
-      },
-    })
-    return result
-  }
-
   export function listen(opts: { port: number; hostname: string; mdns?: boolean; cors?: string[] }) {
     _corsWhitelist = opts.cors ?? []
 
@@ -536,7 +522,7 @@ export namespace Server {
       hostname: opts.hostname,
       idleTimeout: 0,
       fetch: App().fetch,
-      websocket: websocket,
+      // websocket: websocket,
     } as const
     const tryServe = (port: number) => {
       try {

@@ -214,7 +214,7 @@ export namespace Config {
     if (!hasGitIgnore) await NodePolyFillBun.write(gitignore, ["node_modules", "package.json", "bun.lock", ".gitignore"].join("\n"))
 
     await BunProc.run(
-      ["add", "@opencode-ai/plugin@" + (Installation.isLocal() ? "latest" : Installation.VERSION), "--exact"],
+      ["install", "@opencode-ai/plugin@" + (Installation.isLocal() ? "latest" : Installation.VERSION), "--save-exact"],
       {
         cwd: dir,
       },

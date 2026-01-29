@@ -1,6 +1,6 @@
 import { Hono } from "hono"
 import { describeRoute, validator, resolver } from "hono-openapi"
-import { upgradeWebSocket } from "hono/bun"
+// import { upgradeWebSocket } from "hono/bun"
 import z from "zod"
 import { Pty } from "@/pty"
 import { Storage } from "../../storage/storage"
@@ -130,40 +130,40 @@ export const PtyRoutes = lazy(() =>
         return c.json(true)
       },
     )
-    .get(
-      "/:ptyID/connect",
-      describeRoute({
-        summary: "Connect to PTY session",
-        description: "Establish a WebSocket connection to interact with a pseudo-terminal (PTY) session in real-time.",
-        operationId: "pty.connect",
-        responses: {
-          200: {
-            description: "Connected session",
-            content: {
-              "application/json": {
-                schema: resolver(z.boolean()),
-              },
-            },
-          },
-          ...errors(404),
-        },
-      }),
-      validator("param", z.object({ ptyID: z.string() })),
-      upgradeWebSocket((c) => {
-        const id = c.req.param("ptyID")
-        let handler: ReturnType<typeof Pty.connect>
-        if (!Pty.get(id)) throw new Error("Session not found")
-        return {
-          onOpen(_event, ws) {
-            handler = Pty.connect(id, ws)
-          },
-          onMessage(event) {
-            handler?.onMessage(String(event.data))
-          },
-          onClose() {
-            handler?.onClose()
-          },
-        }
-      }),
-    ),
+    // .get(
+    //   "/:ptyID/connect",
+    //   describeRoute({
+    //     summary: "Connect to PTY session",
+    //     description: "Establish a WebSocket connection to interact with a pseudo-terminal (PTY) session in real-time.",
+    //     operationId: "pty.connect",
+    //     responses: {
+    //       200: {
+    //         description: "Connected session",
+    //         content: {
+    //           "application/json": {
+    //             schema: resolver(z.boolean()),
+    //           },
+    //         },
+    //       },
+    //       ...errors(404),
+    //     },
+    //   }),
+    //   validator("param", z.object({ ptyID: z.string() })),
+    //   upgradeWebSocket((c) => {
+    //     const id = c.req.param("ptyID")
+    //     let handler: ReturnType<typeof Pty.connect>
+    //     if (!Pty.get(id)) throw new Error("Session not found")
+    //     return {
+    //       onOpen(_event, ws) {
+    //         handler = Pty.connect(id, ws)
+    //       },
+    //       onMessage(event) {
+    //         handler?.onMessage(String(event.data))
+    //       },
+    //       onClose() {
+    //         handler?.onClose()
+    //       },
+    //     }
+    //   }),
+    // ),
 )
