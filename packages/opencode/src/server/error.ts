@@ -1,33 +1,12 @@
-import { resolver } from "hono-openapi"
-import z from "zod"
-import { Storage } from "../storage/storage"
+// Error definitions for Fastify routes (simplified without OpenAPI)
+// These are kept for reference but no longer used for OpenAPI schema generation
 
 export const ERRORS = {
   400: {
     description: "Bad request",
-    content: {
-      "application/json": {
-        schema: resolver(
-          z
-            .object({
-              data: z.any(),
-              errors: z.array(z.record(z.string(), z.any())),
-              success: z.literal(false),
-            })
-            .meta({
-              ref: "BadRequestError",
-            }),
-        ),
-      },
-    },
   },
   404: {
     description: "Not found",
-    content: {
-      "application/json": {
-        schema: resolver(Storage.NotFoundError.Schema),
-      },
-    },
   },
 } as const
 

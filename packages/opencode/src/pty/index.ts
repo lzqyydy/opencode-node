@@ -4,7 +4,6 @@ import { type IPty } from "node-pty"
 import z from "zod"
 import { Identifier } from "../id/id"
 import { Log } from "../util/log"
-import type { WSContext } from "hono/ws"
 import { Instance } from "../project/instance"
 import { lazy } from "@opencode-ai/util/lazy"
 import { Shell } from "@/shell/shell"
@@ -63,11 +62,18 @@ export namespace Pty {
     Deleted: BusEvent.define("pty.deleted", z.object({ id: Identifier.schema("pty") })),
   }
 
+  // Generic WebSocket interface for compatibility with different frameworks
+  export interface WebSocketLike {
+    send: (data: string | ArrayBuffer) => void
+    close: () => void
+    readyState?: number
+  }
+
   interface ActiveSession {
     info: Info
     process: IPty
     buffer: string
-    subscribers: Set<WSContext>
+    subscribers: Set<WebSocketLike>
   }
 
   const state = Instance.state(
@@ -206,7 +212,7 @@ export namespace Pty {
     }
   }
 
-  export function connect(id: string, ws: WSContext) {
+  export function connect(id: string, ws: WebSocketLike) {
     const session = state().get(id)
     if (!session) {
       ws.close()

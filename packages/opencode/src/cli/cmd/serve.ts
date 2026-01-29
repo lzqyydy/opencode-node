@@ -12,8 +12,8 @@ export const ServeCommand = cmd({
       console.log("Warning: OPENCODE_SERVER_PASSWORD is not set; server is unsecured.")
     }
     const opts = await resolveNetworkOptions(args)
-    const server = Server.listen(opts)
-    console.log(`opencode server listening on http://${server.hostname}:${server.port}`)
+    const server = await Server.listen(opts)
+    console.log(`opencode server listening on ${server.url.toString()}`)
     await new Promise(() => {})
     await server.stop()
   },
