@@ -53,42 +53,44 @@ export const PtyRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) =>
 
   // GET /pty/:ptyID/connect - WebSocket connection
   fastify.get("/:ptyID/connect", { websocket: true }, (connection, request) => {
-    const { ptyID } = request.params as { ptyID: string }
+    return withInstance(request, async () => {
+      const { ptyID } = request.params as { ptyID: string }
 
-    if (!Pty.get(ptyID)) {
-      connection.socket.close(1008, "Session not found")
-      return
-    }
+      if (!Pty.get(ptyID)) {
+        connection.socket.close(1008, "Session not found")
+        return
+      }
 
-    // Create a WebSocket adapter that matches the expected interface
-    const wsAdapter: Pty.WebSocketLike = {
-      send: (data: string | ArrayBuffer) => {
-        if (connection.socket.readyState === 1) {
-          // WebSocket.OPEN
-          connection.socket.send(data)
-        }
-      },
-      close: () => {
-        connection.socket.close()
-      },
-      readyState: connection.socket.readyState,
-    }
+      // Create a WebSocket adapter that matches the expected interface
+      const wsAdapter: Pty.WebSocketLike = {
+        send: (data: string | ArrayBuffer) => {
+          if (connection.socket.readyState === 1) {
+            // WebSocket.OPEN
+            connection.socket.send(data)
+          }
+        },
+        close: () => {
+          connection.socket.close()
+        },
+        readyState: connection.socket.readyState,
+      }
 
-    // Update readyState when it changes
-    const updateReadyState = () => {
-      wsAdapter.readyState = connection.socket.readyState
-    }
+      // Update readyState when it changes
+      const updateReadyState = () => {
+        wsAdapter.readyState = connection.socket.readyState
+      }
 
-    const handler = Pty.connect(ptyID, wsAdapter)
+      const handler = Pty.connect(ptyID, wsAdapter)
 
-    connection.socket.on("message", (message) => {
-      updateReadyState()
-      handler?.onMessage(String(message))
-    })
+      connection.socket.on("message", (message) => {
+        updateReadyState()
+        handler?.onMessage(String(message))
+      })
 
-    connection.socket.on("close", () => {
-      updateReadyState()
-      handler?.onClose()
+      connection.socket.on("close", () => {
+        updateReadyState()
+        handler?.onClose()
+      })
     })
   })
 }

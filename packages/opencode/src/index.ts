@@ -11,6 +11,9 @@ import { EOL } from "os"
 import { WebCommand } from "./cli/cmd/web"
 import { ResolveMessage } from "./util/node-polyfill"
 
+// write current PID to console
+console.log(`PID: ${process.pid}${EOL}`)
+
 process.on("unhandledRejection", (e) => {
   Log.Default.error("rejection", {
     e: e instanceof Error ? e.message : e,
