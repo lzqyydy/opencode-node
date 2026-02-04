@@ -1,5 +1,5 @@
 import {NodePolyFillBun} from "@/util/node-polyfill"
-import { Global } from "../global"
+import modelDevResult from "./modelDev.ts"
 
 export async function data() {
   const path = process.env.MODELS_DEV_API_JSON
@@ -10,7 +10,5 @@ export async function data() {
       return await file.text()
     }
   }
-  const url = Global.Path.modelsDevUrl
-  const json = await fetch(`${url}/api.json`).then((x) => x.text())
-  return json
+  return modelDevResult;
 }

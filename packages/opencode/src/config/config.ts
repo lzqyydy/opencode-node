@@ -84,7 +84,7 @@ export namespace Config {
     if (!Flag.OPENCODE_DISABLE_PROJECT_CONFIG) {
       for (const file of ["opencode.jsonc", "opencode.json"]) {
         const found = await Filesystem.findUp(file, Instance.directory, Instance.worktree)
-        for (const resolved of found.toReversed()) {
+        for (const resolved of [...found].reverse()) {
           result = mergeConfigConcatArrays(result, await loadFile(resolved))
         }
       }
@@ -410,7 +410,7 @@ export namespace Config {
     // e.g., "oh-my-opencode@2.4.3", "file:///path/to/plugin.js"
     const uniqueSpecifiers: string[] = []
 
-    for (const specifier of plugins.toReversed()) {
+    for (const specifier of [...plugins].reverse()) {
       const name = getPluginName(specifier)
       if (!seenNames.has(name)) {
         seenNames.add(name)
@@ -418,7 +418,7 @@ export namespace Config {
       }
     }
 
-    return uniqueSpecifiers.toReversed()
+    return [...uniqueSpecifiers].reverse()
   }
 
   export const McpLocal = z

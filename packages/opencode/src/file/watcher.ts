@@ -14,6 +14,8 @@ import type ParcelWatcher from "@parcel/watcher"
 import { $ } from "@/util/node-shell"
 import { Flag } from "@/flag/flag"
 import { readdir } from "fs/promises"
+import {createRequire} from "module"
+const require = createRequire(import.meta.url)
 
 const SUBSCRIBE_TIMEOUT_MS = 10_000
 
