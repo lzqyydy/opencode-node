@@ -64,73 +64,73 @@ export namespace BunProc {
 
   export async function install(pkg: string, version = "latest") {
     // Use lock to ensure only one install at a time
-    using _ = await Lock.write("bun-install")
+    return Lock.withWrite("bun-install", async () => {
+      const mod = path.join(Global.Path.cache, "node_modules", pkg)
+      const pkgjson = NodePolyFillBun.file(path.join(Global.Path.cache, "package.json"))
+      const parsed = await pkgjson.json().catch(async () => {
+        const result = { dependencies: {} }
+        await NodePolyFillBun.write(pkgjson.name!, JSON.stringify(result, null, 2))
+        return result
+      })
+      const dependencies = parsed.dependencies ?? {}
+      if (!parsed.dependencies) parsed.dependencies = dependencies
+      const modExists = await Filesystem.exists(mod)
+      if (dependencies[pkg] === version && modExists) return mod
 
-    const mod = path.join(Global.Path.cache, "node_modules", pkg)
-    const pkgjson = NodePolyFillBun.file(path.join(Global.Path.cache, "package.json"))
-    const parsed = await pkgjson.json().catch(async () => {
-      const result = { dependencies: {} }
-      await NodePolyFillBun.write(pkgjson.name!, JSON.stringify(result, null, 2))
-      return result
-    })
-    const dependencies = parsed.dependencies ?? {}
-    if (!parsed.dependencies) parsed.dependencies = dependencies
-    const modExists = await Filesystem.exists(mod)
-    if (dependencies[pkg] === version && modExists) return mod
-
-    const proxied = !!(
-      process.env.HTTP_PROXY ||
-      process.env.HTTPS_PROXY ||
-      process.env.http_proxy ||
-      process.env.https_proxy
-    )
-
-    // Build command arguments (npm-compatible)
-    const args = [
-      "npm",
-      "install",
-      "--force",
-      "--save-exact",
-      // Use --prefer-online when proxy is configured to avoid cache issues
-      ...(proxied ? ["--prefer-online"] : []),
-      "--prefix",
-      Global.Path.cache,
-      pkg + "@" + version,
-    ]
-
-    // Let Bun handle registry resolution:
-    // - If .npmrc files exist, Bun will use them automatically
-    // - If no .npmrc files exist, Bun will default to https://registry.npmjs.org
-    // - No need to pass --registry flag
-    log.info("installing package using Bun's default registry resolution", {
-      pkg,
-      version,
-    })
-
-    await BunProc.run(args, {
-      cwd: Global.Path.cache,
-    }).catch((e) => {
-      throw new InstallFailedError(
-        { pkg, version },
-        {
-          cause: e,
-        },
+      const proxied = !!(
+        process.env.HTTP_PROXY ||
+        process.env.HTTPS_PROXY ||
+        process.env.http_proxy ||
+        process.env.https_proxy
       )
-    })
 
-    // Resolve actual version from installed package when using "latest"
-    // This ensures subsequent starts use the cached version until explicitly updated
-    let resolvedVersion = version
-    if (version === "latest") {
-      const installedPkgJson = NodePolyFillBun.file(path.join(mod, "package.json"))
-      const installedPkg = await installedPkgJson.json().catch(() => null)
-      if (installedPkg?.version) {
-        resolvedVersion = installedPkg.version
+      // Build command arguments (npm-compatible)
+      const args = [
+        "npm",
+        "install",
+        "--force",
+        "--save-exact",
+        // Use --prefer-online when proxy is configured to avoid cache issues
+        ...(proxied ? ["--prefer-online"] : []),
+        "--prefix",
+        Global.Path.cache,
+        pkg + "@" + version,
+      ]
+
+      // Let Bun handle registry resolution:
+      // - If .npmrc files exist, Bun will use them automatically
+      // - If no .npmrc files exist, Bun will default to https://registry.npmjs.org
+      // - No need to pass --registry flag
+      log.info("installing package using Bun's default registry resolution", {
+        pkg,
+        version,
+      })
+
+      await BunProc.run(args, {
+        cwd: Global.Path.cache,
+      }).catch((e) => {
+        throw new InstallFailedError(
+          { pkg, version },
+          {
+            cause: e,
+          },
+        )
+      })
+
+      // Resolve actual version from installed package when using "latest"
+      // This ensures subsequent starts use the cached version until explicitly updated
+      let resolvedVersion = version
+      if (version === "latest") {
+        const installedPkgJson = NodePolyFillBun.file(path.join(mod, "package.json"))
+        const installedPkg = await installedPkgJson.json().catch(() => null)
+        if (installedPkg?.version) {
+          resolvedVersion = installedPkg.version
+        }
       }
-    }
 
-    parsed.dependencies[pkg] = resolvedVersion
-    await NodePolyFillBun.write(pkgjson.name!, JSON.stringify(parsed, null, 2))
-    return mod
+      parsed.dependencies[pkg] = resolvedVersion
+      await NodePolyFillBun.write(pkgjson.name!, JSON.stringify(parsed, null, 2))
+      return mod
+    })
   }
 }

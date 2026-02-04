@@ -170,32 +170,35 @@ export namespace Storage {
   export async function read<T>(key: string[]) {
     const dir = await state().then((x) => x.dir)
     const target = path.join(dir, ...key) + ".json"
-    return withErrorHandling(async () => {
-      using _ = await Lock.read(target)
-      const result = await NodePolyFillBun.file(target).json()
-      return result as T
-    })
+    return withErrorHandling(() =>
+      Lock.withRead(target, async () => {
+        const result = await NodePolyFillBun.file(target).json()
+        return result as T
+      }),
+    )
   }
 
   export async function update<T>(key: string[], fn: (draft: T) => void) {
     const dir = await state().then((x) => x.dir)
     const target = path.join(dir, ...key) + ".json"
-    return withErrorHandling(async () => {
-      using _ = await Lock.write(target)
-      const content = await NodePolyFillBun.file(target).json()
-      fn(content)
-      await NodePolyFillBun.write(target, JSON.stringify(content, null, 2))
-      return content as T
-    })
+    return withErrorHandling(() =>
+      Lock.withWrite(target, async () => {
+        const content = await NodePolyFillBun.file(target).json()
+        fn(content)
+        await NodePolyFillBun.write(target, JSON.stringify(content, null, 2))
+        return content as T
+      }),
+    )
   }
 
   export async function write<T>(key: string[], content: T) {
     const dir = await state().then((x) => x.dir)
     const target = path.join(dir, ...key) + ".json"
-    return withErrorHandling(async () => {
-      using _ = await Lock.write(target)
-      await NodePolyFillBun.write(target, JSON.stringify(content, null, 2))
-    })
+    return withErrorHandling(() =>
+      Lock.withWrite(target, async () => {
+        await NodePolyFillBun.write(target, JSON.stringify(content, null, 2))
+      }),
+    )
   }
 
   async function withErrorHandling<T>(body: () => Promise<T>) {

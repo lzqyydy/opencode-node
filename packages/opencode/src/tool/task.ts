@@ -139,7 +139,7 @@ export const TaskTool = Tool.define("task", async (ctx) => {
         SessionPrompt.cancel(session.id)
       }
       ctx.abort.addEventListener("abort", cancel)
-      using _ = defer(() => ctx.abort.removeEventListener("abort", cancel))
+      // using _ = defer(() => ctx.abort.removeEventListener("abort", cancel))
       const promptParts = await SessionPrompt.resolvePromptParts(params.prompt)
 
       const result = await SessionPrompt.prompt({
@@ -174,6 +174,8 @@ export const TaskTool = Tool.define("task", async (ctx) => {
       const text = result.parts.findLast((x) => x.type === "text")?.text ?? ""
 
       const output = text + "\n\n" + ["<task_metadata>", `session_id: ${session.id}`, "</task_metadata>"].join("\n")
+
+      ctx.abort.removeEventListener("abort", cancel)
 
       return {
         title: params.description,

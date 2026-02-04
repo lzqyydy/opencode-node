@@ -33,7 +33,7 @@ export namespace Log {
       extra?: Record<string, any>,
     ): {
       stop(): void
-      [Symbol.dispose](): void
+      dispose(): void
     }
   }
 
@@ -163,9 +163,7 @@ export namespace Log {
         }
         return {
           stop,
-          [Symbol.dispose]() {
-            stop()
-          },
+          dispose: stop,
         }
       },
     }

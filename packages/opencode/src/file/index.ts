@@ -1,20 +1,20 @@
-import { BusEvent } from "@/bus/bus-event"
+import {BusEvent} from "@/bus/bus-event"
 import z from "zod"
-import { $ } from "@/util/node-shell"
-import { formatPatch, structuredPatch } from "diff"
+import {$} from "@/util/node-shell"
+import {formatPatch, structuredPatch} from "diff"
 import path from "path"
 import fs from "fs"
 import ignore from "ignore"
-import { Log } from "../util/log"
-import { Filesystem } from "../util/filesystem"
-import { Instance } from "../project/instance"
-import { Ripgrep } from "./ripgrep"
+import {Log} from "../util/log"
+import {Filesystem} from "../util/filesystem"
+import {Instance} from "../project/instance"
+import {Ripgrep} from "./ripgrep"
 import fuzzysort from "fuzzysort"
-import { Global } from "../global"
+import {Global} from "../global"
 import {NodePolyFillBun, type NodeBunFile} from "@/util/node-polyfill"
 
 export namespace File {
-  const log = Log.create({ service: "file" })
+  const log = Log.create({service: "file"})
 
   export const Info = z
     .object({
@@ -75,7 +75,7 @@ export namespace File {
 
   async function shouldEncode(file: NodeBunFile): Promise<boolean> {
     const type = file.type?.toLowerCase()
-    log.info("shouldEncode", { type })
+    log.info("shouldEncode", {type})
     if (!type) return false
 
     if (type.startsWith("text/")) return false
@@ -120,8 +120,8 @@ export namespace File {
   }
 
   const state = Instance.state(async () => {
-    type Entry = { files: string[]; dirs: string[] }
-    let cache: Entry = { files: [], dirs: [] }
+    type Entry = {files: string[]; dirs: string[]}
+    let cache: Entry = {files: [], dirs: []}
     let fetching = false
 
     const isGlobalHome = Instance.directory === Global.Path.home && Instance.project.id === "global"
@@ -143,7 +143,7 @@ export namespace File {
         const shouldIgnoreNested = (name: string) => name.startsWith(".") || ignoreNested.has(name)
 
         const top = await fs.promises
-          .readdir(Instance.directory, { withFileTypes: true })
+          .readdir(Instance.directory, {withFileTypes: true})
           .catch(() => [] as fs.Dirent[])
 
         for (const entry of top) {
@@ -152,7 +152,7 @@ export namespace File {
           dirs.add(entry.name + "/")
 
           const base = path.join(Instance.directory, entry.name)
-          const children = await fs.promises.readdir(base, { withFileTypes: true }).catch(() => [] as fs.Dirent[])
+          const children = await fs.promises.readdir(base, {withFileTypes: true}).catch(() => [] as fs.Dirent[])
           for (const child of children) {
             if (!child.isDirectory()) continue
             if (shouldIgnoreNested(child.name)) continue
@@ -167,7 +167,7 @@ export namespace File {
       }
 
       const set = new Set<string>()
-      for await (const file of Ripgrep.files({ cwd: Instance.directory })) {
+      for await (const file of Ripgrep.files({cwd: Instance.directory})) {
         result.files.push(file)
         let current = file
         while (true) {
@@ -273,50 +273,54 @@ export namespace File {
   }
 
   export async function read(file: string): Promise<Content> {
-    using _ = log.time("read", { file })
-    const project = Instance.project
-    const full = path.join(Instance.directory, file)
+    const _timer = log.time("read", {file})
+    try {
+      const project = Instance.project
+      const full = path.join(Instance.directory, file)
 
-    // TODO: Filesystem.contains is lexical only - symlinks inside the project can escape.
-    // TODO: On Windows, cross-drive paths bypass this check. Consider realpath canonicalization.
-    if (!Instance.containsPath(full)) {
-      throw new Error(`Access denied: path escapes project directory`)
-    }
-
-    const bunFile = NodePolyFillBun.file(full)
-
-    if (!(await bunFile.exists())) {
-      return { type: "text", content: "" }
-    }
-
-    const encode = await shouldEncode(bunFile)
-
-    if (encode) {
-      const buffer = await bunFile.arrayBuffer().catch(() => new ArrayBuffer(0))
-      const content = Buffer.from(buffer).toString("base64")
-      const mimeType = bunFile.type || "application/octet-stream"
-      return { type: "text", content, mimeType, encoding: "base64" }
-    }
-
-    const content = await bunFile
-      .text()
-      .catch(() => "")
-      .then((x) => x.trim())
-
-    if (project.vcs === "git") {
-      let diff = await $`git diff ${file}`.cwd(Instance.directory).quiet().nothrow().text()
-      if (!diff.trim()) diff = await $`git diff --staged ${file}`.cwd(Instance.directory).quiet().nothrow().text()
-      if (diff.trim()) {
-        const original = await $`git show HEAD:${file}`.cwd(Instance.directory).quiet().nothrow().text()
-        const patch = structuredPatch(file, file, original, content, "old", "new", {
-          context: Infinity,
-          ignoreWhitespace: true,
-        })
-        const diff = formatPatch(patch)
-        return { type: "text", content, patch, diff }
+      // TODO: Filesystem.contains is lexical only - symlinks inside the project can escape.
+      // TODO: On Windows, cross-drive paths bypass this check. Consider realpath canonicalization.
+      if (!Instance.containsPath(full)) {
+        throw new Error(`Access denied: path escapes project directory`)
       }
+
+      const bunFile = NodePolyFillBun.file(full)
+
+      if (!(await bunFile.exists())) {
+        return {type: "text", content: ""}
+      }
+
+      const encode = await shouldEncode(bunFile)
+
+      if (encode) {
+        const buffer = await bunFile.arrayBuffer().catch(() => new ArrayBuffer(0))
+        const content = Buffer.from(buffer).toString("base64")
+        const mimeType = bunFile.type || "application/octet-stream"
+        return {type: "text", content, mimeType, encoding: "base64"}
+      }
+
+      const content = await bunFile
+        .text()
+        .catch(() => "")
+        .then((x) => x.trim())
+
+      if (project.vcs === "git") {
+        let diff = await $`git diff ${file}`.cwd(Instance.directory).quiet().nothrow().text()
+        if (!diff.trim()) diff = await $`git diff --staged ${file}`.cwd(Instance.directory).quiet().nothrow().text()
+        if (diff.trim()) {
+          const original = await $`git show HEAD:${file}`.cwd(Instance.directory).quiet().nothrow().text()
+          const patch = structuredPatch(file, file, original, content, "old", "new", {
+            context: Infinity,
+            ignoreWhitespace: true,
+          })
+          const diff = formatPatch(patch)
+          return {type: "text", content, patch, diff}
+        }
+      }
+      return {type: "text", content}
+    } finally {
+      _timer.dispose()
     }
-    return { type: "text", content }
   }
 
   export async function list(dir?: string) {
@@ -369,11 +373,11 @@ export namespace File {
     })
   }
 
-  export async function search(input: { query: string; limit?: number; dirs?: boolean; type?: "file" | "directory" }) {
+  export async function search(input: {query: string; limit?: number; dirs?: boolean; type?: "file" | "directory"}) {
     const query = input.query.trim()
     const limit = input.limit ?? 100
     const kind = input.type ?? (input.dirs === false ? "file" : "all")
-    log.info("search", { query, kind })
+    log.info("search", {query, kind})
 
     const result = await state().then((x) => x.files())
 
@@ -402,10 +406,10 @@ export namespace File {
       kind === "file" ? result.files : kind === "directory" ? result.dirs : [...result.files, ...result.dirs]
 
     const searchLimit = kind === "directory" && !preferHidden ? limit * 20 : limit
-    const sorted = fuzzysort.go(query, items, { limit: searchLimit }).map((r) => r.target)
+    const sorted = fuzzysort.go(query, items, {limit: searchLimit}).map((r) => r.target)
     const output = kind === "directory" ? sortHiddenLast(sorted).slice(0, limit) : sorted
 
-    log.info("search", { query, kind, results: output.length })
+    log.info("search", {query, kind, results: output.length})
     return output
   }
 }

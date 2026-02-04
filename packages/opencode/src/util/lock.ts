@@ -1,3 +1,7 @@
+export interface LockHandle {
+  dispose: () => void
+}
+
 export namespace Lock {
   const locks = new Map<
     string,
@@ -44,14 +48,14 @@ export namespace Lock {
     }
   }
 
-  export async function read(key: string): Promise<Disposable> {
+  export async function read(key: string): Promise<LockHandle> {
     const lock = get(key)
 
     return new Promise((resolve) => {
       if (!lock.writer && lock.waitingWriters.length === 0) {
         lock.readers++
         resolve({
-          [Symbol.dispose]: () => {
+          dispose: () => {
             lock.readers--
             process(key)
           },
@@ -60,7 +64,7 @@ export namespace Lock {
         lock.waitingReaders.push(() => {
           lock.readers++
           resolve({
-            [Symbol.dispose]: () => {
+            dispose: () => {
               lock.readers--
               process(key)
             },
@@ -70,14 +74,14 @@ export namespace Lock {
     })
   }
 
-  export async function write(key: string): Promise<Disposable> {
+  export async function write(key: string): Promise<LockHandle> {
     const lock = get(key)
 
     return new Promise((resolve) => {
       if (!lock.writer && lock.readers === 0) {
         lock.writer = true
         resolve({
-          [Symbol.dispose]: () => {
+          dispose: () => {
             lock.writer = false
             process(key)
           },
@@ -86,7 +90,7 @@ export namespace Lock {
         lock.waitingWriters.push(() => {
           lock.writer = true
           resolve({
-            [Symbol.dispose]: () => {
+            dispose: () => {
               lock.writer = false
               process(key)
             },
@@ -94,5 +98,25 @@ export namespace Lock {
         })
       }
     })
+  }
+
+  /** Helper to run a function with a write lock, automatically releasing on completion */
+  export async function withWrite<T>(key: string, fn: () => Promise<T>): Promise<T> {
+    const handle = await write(key)
+    try {
+      return await fn()
+    } finally {
+      handle.dispose()
+    }
+  }
+
+  /** Helper to run a function with a read lock, automatically releasing on completion */
+  export async function withRead<T>(key: string, fn: () => Promise<T>): Promise<T> {
+    const handle = await read(key)
+    try {
+      return await fn()
+    } finally {
+      handle.dispose()
+    }
   }
 }

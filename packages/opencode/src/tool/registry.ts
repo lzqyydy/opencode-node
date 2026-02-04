@@ -1,36 +1,36 @@
-import { QuestionTool } from "./question"
-import { BashTool } from "./bash"
-import { EditTool } from "./edit"
-import { GlobTool } from "./glob"
-import { GrepTool } from "./grep"
-import { BatchTool } from "./batch"
-import { ReadTool } from "./read"
-import { TaskTool } from "./task"
-import { TodoWriteTool, TodoReadTool } from "./todo"
-import { WebFetchTool } from "./webfetch"
-import { WriteTool } from "./write"
-import { InvalidTool } from "./invalid"
-import { SkillTool } from "./skill"
-import type { Agent } from "../agent/agent"
-import { Tool } from "./tool"
-import { Instance } from "../project/instance"
-import { Config } from "../config/config"
+import {QuestionTool} from "./question"
+import {BashTool} from "./bash"
+import {EditTool} from "./edit"
+import {GlobTool} from "./glob"
+import {GrepTool} from "./grep"
+import {BatchTool} from "./batch"
+import {ReadTool} from "./read"
+import {TaskTool} from "./task"
+import {TodoWriteTool, TodoReadTool} from "./todo"
+import {WebFetchTool} from "./webfetch"
+import {WriteTool} from "./write"
+import {InvalidTool} from "./invalid"
+import {SkillTool} from "./skill"
+import type {Agent} from "../agent/agent"
+import {Tool} from "./tool"
+import {Instance} from "../project/instance"
+import {Config} from "../config/config"
 import path from "path"
-import { type ToolDefinition } from "@opencode-ai/plugin"
+import {type ToolDefinition} from "@opencode-ai/plugin"
 import z from "zod"
-import { Plugin } from "../plugin"
-import { WebSearchTool } from "./websearch"
-import { CodeSearchTool } from "./codesearch"
-import { Flag } from "@/flag/flag"
-import { Log } from "@/util/log"
-import { LspTool } from "./lsp"
-import { Truncate } from "./truncation"
-import { PlanExitTool, PlanEnterTool } from "./plan"
-import { ApplyPatchTool } from "./apply_patch"
+import {Plugin} from "../plugin"
+import {WebSearchTool} from "./websearch"
+import {CodeSearchTool} from "./codesearch"
+import {Flag} from "@/flag/flag"
+import {Log} from "@/util/log"
+import {LspTool} from "./lsp"
+import {Truncate} from "./truncation"
+import {PlanExitTool, PlanEnterTool} from "./plan"
+import {ApplyPatchTool} from "./apply_patch"
 import {NodePolyFillBun} from "@/util/node-polyfill"
 
 export namespace ToolRegistry {
-  const log = Log.create({ service: "tool.registry" })
+  const log = Log.create({service: "tool.registry"})
 
   export const state = Instance.state(async () => {
     const custom = [] as Tool.Info[]
@@ -58,7 +58,7 @@ export namespace ToolRegistry {
       }
     }
 
-    return { custom }
+    return {custom}
   })
 
   function fromPlugin(id: string, def: ToolDefinition): Tool.Info {
@@ -73,7 +73,7 @@ export namespace ToolRegistry {
           return {
             title: "",
             output: out.truncated ? out.content : result,
-            metadata: { truncated: out.truncated, outputPath: out.truncated ? out.outputPath : undefined },
+            metadata: {truncated: out.truncated, outputPath: out.truncated ? out.outputPath : undefined},
           }
         },
       }),
@@ -81,7 +81,7 @@ export namespace ToolRegistry {
   }
 
   export async function register(tool: Tool.Info) {
-    const { custom } = await state()
+    const {custom} = await state()
     const idx = custom.findIndex((t) => t.id === tool.id)
     if (idx >= 0) {
       custom.splice(idx, 1, tool)
@@ -147,10 +147,14 @@ export namespace ToolRegistry {
           return true
         })
         .map(async (t) => {
-          using _ = log.time(t.id)
-          return {
-            id: t.id,
-            ...(await t.init({ agent })),
+          const _timer = log.time(t.id)
+          try {
+            return {
+              id: t.id,
+              ...(await t.init({agent})),
+            }
+          } finally {
+            _timer.dispose()
           }
         }),
     )
