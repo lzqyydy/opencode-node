@@ -1,4 +1,4 @@
-import { isDeepEqual } from "remeda"
+import { isEqual as isDeepEqual } from "lodash-es"
 import type { ParsedKey } from "@opentui/core"
 
 export namespace Keybind {

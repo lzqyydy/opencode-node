@@ -34,6 +34,7 @@ export namespace Log {
     ): {
       stop(): void
       dispose(): void
+      [Symbol.dispose](): void
     }
   }
 
@@ -166,6 +167,7 @@ export namespace Log {
         return {
           stop,
           dispose: stop,
+          [Symbol.dispose]: stop,
         }
       },
     }

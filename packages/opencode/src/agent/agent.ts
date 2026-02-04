@@ -14,7 +14,7 @@ import PROMPT_EXPLORE from "./prompt/explore.txt.ts"
 import PROMPT_SUMMARY from "./prompt/summary.txt.ts"
 import PROMPT_TITLE from "./prompt/title.txt.ts"
 import { PermissionNext } from "@/permission/next"
-import { mergeDeep, pipe, sortBy, values } from "remeda"
+import { merge as mergeDeep, flow as pipe, sortBy, values } from "lodash-es"
 import { Global } from "@/global"
 import path from "path"
 
@@ -249,11 +249,9 @@ export namespace Agent {
 
   export async function list() {
     const cfg = await Config.get()
-    return pipe(
-      await state(),
-      values(),
-      sortBy([(x) => (cfg.default_agent ? x.name === cfg.default_agent : x.name === "build"), "desc"]),
-    )
+    const agents = await state()
+    const agentList = values(agents)
+    return sortBy(agentList, [(x) => (cfg.default_agent ? x.name === cfg.default_agent : x.name === "build"), "desc"])
   }
 
   export async function defaultAgent() {

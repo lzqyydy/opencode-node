@@ -13,7 +13,7 @@ import {
   tool,
   jsonSchema,
 } from "ai"
-import { clone, mergeDeep, pipe } from "remeda"
+import { clone, merge as mergeDeep, flow as pipe } from "lodash-es"
 import { ProviderTransform } from "@/provider/transform"
 import { Config } from "@/config/config"
 import { Instance } from "@/project/instance"
@@ -103,12 +103,10 @@ export namespace LLM {
           sessionID: input.sessionID,
           providerOptions: provider.options,
         })
-    const options: Record<string, any> = pipe(
-      base,
-      mergeDeep(input.model.options),
-      mergeDeep(input.agent.options),
-      mergeDeep(variant),
-    )
+    let options: Record<string, any> = base
+    options = mergeDeep(options, input.model.options)
+    options = mergeDeep(options, input.agent.options)
+    options = mergeDeep(options, variant)
     if (isCodex) {
       options.instructions = SystemPrompt.instructions()
     }

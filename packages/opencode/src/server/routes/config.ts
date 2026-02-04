@@ -1,7 +1,7 @@
 import type {FastifyInstance, FastifyPluginAsync} from "fastify"
 import {Config} from "../../config/config"
 import {Provider} from "../../provider/provider"
-import {mapValues} from "remeda"
+import {mapValues} from "lodash-es"
 import {Log} from "../../util/log"
 import {withInstance} from "../instance-context"
 

@@ -5,7 +5,7 @@ import os from "os"
 import z from "zod"
 import { Filesystem } from "../util/filesystem"
 import { ModelsDev } from "../provider/models"
-import { mergeDeep, pipe, unique } from "remeda"
+import { merge as mergeDeep, uniq as unique } from "lodash-es"
 import { Global } from "../global"
 import fs from "fs/promises"
 import { lazy } from "../util/lazy"
@@ -1098,12 +1098,10 @@ export namespace Config {
   export type Info = z.output<typeof Info>
 
   export const global = lazy(async () => {
-    let result: Info = pipe(
-      {},
-      mergeDeep(await loadFile(path.join(Global.Path.config, "config.json"))),
-      mergeDeep(await loadFile(path.join(Global.Path.config, "opencode.json"))),
-      mergeDeep(await loadFile(path.join(Global.Path.config, "opencode.jsonc"))),
-    )
+    let result: Info = {} as Info
+    result = mergeDeep(result, await loadFile(path.join(Global.Path.config, "config.json")))
+    result = mergeDeep(result, await loadFile(path.join(Global.Path.config, "opencode.json")))
+    result = mergeDeep(result, await loadFile(path.join(Global.Path.config, "opencode.jsonc")))
 
     await import(path.join(Global.Path.config, "config"), {
       with: {

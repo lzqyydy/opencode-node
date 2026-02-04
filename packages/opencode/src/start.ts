@@ -9,6 +9,25 @@ if (typeof Array.fromAsync !== 'function') {
   };
 }
 
+// Polyfill for Array.prototype.toSorted (ES2023, Node.js 20+)
+if (typeof Array.prototype.toSorted !== 'function') {
+  (Array.prototype as any).toSorted = function<T>(this: T[], compareFn?: (a: T, b: T) => number): T[] {
+    return [...this].sort(compareFn);
+  };
+}
+
+// Polyfill for Array.prototype.findLast (ES2023, Node.js 18+)
+if (typeof Array.prototype.findLast !== 'function') {
+  (Array.prototype as any).findLast = function<T>(this: T[], predicate: (value: T, index: number, array: T[]) => boolean, thisArg?: any): T | undefined {
+    for (let i = this.length - 1; i >= 0; i--) {
+      if (predicate.call(thisArg, this[i], i, this)) {
+        return this[i];
+      }
+    }
+    return undefined;
+  };
+}
+
 import {compare} from 'compare-versions';
 if (compare(process.version, '18.0.0', '<')) {
   await import('web-streams-polyfill/polyfill');

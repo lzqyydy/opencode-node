@@ -6,7 +6,7 @@ import z from "zod"
 
 import * as Formatter from "./formatter"
 import { Config } from "../config/config"
-import { mergeDeep } from "remeda"
+import { merge as mergeDeep } from "lodash-es"
 import { Instance } from "../project/instance"
 import {NodePolyFillBun} from "@/util/node-polyfill"
 

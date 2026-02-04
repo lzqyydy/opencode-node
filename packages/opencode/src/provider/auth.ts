@@ -1,20 +1,18 @@
 import { Instance } from "@/project/instance"
 import { Plugin } from "../plugin"
-import { map, filter, pipe, fromEntries, mapValues } from "remeda"
+import { map, filter, flow as pipe, fromPairs as fromEntries, mapValues } from "lodash-es"
 import z from "zod"
 import { fn } from "@/util/fn"
-import type { AuthOuathResult, Hooks } from "@opencode-ai/plugin"
+import type { AuthOuathResult, Hooks, AuthHook } from "@opencode-ai/plugin"
 import { NamedError } from "@opencode-ai/util/error"
 import { Auth } from "@/auth"
 
 export namespace ProviderAuth {
   const state = Instance.state(async () => {
-    const methods = pipe(
-      await Plugin.list(),
-      filter((x) => x.auth?.provider !== undefined),
-      map((x) => [x.auth!.provider, x.auth!] as const),
-      fromEntries(),
-    )
+    const plugins = await Plugin.list()
+    const filtered = filter(plugins, (x) => x.auth?.provider !== undefined)
+    const mapped = map(filtered, (x) => [x.auth!.provider, x.auth!])
+    const methods = fromEntries(mapped)
     return { methods, pending: {} as Record<string, AuthOuathResult> }
   })
 
@@ -28,9 +26,9 @@ export namespace ProviderAuth {
     })
   export type Method = z.infer<typeof Method>
 
-  export async function methods() {
+export async function methods() {
     const s = await state().then((x) => x.methods)
-    return mapValues(s, (x) =>
+    return mapValues(s, (x: AuthHook) =>
       x.methods.map(
         (y): Method => ({
           type: y.type,

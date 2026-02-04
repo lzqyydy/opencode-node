@@ -1,4 +1,4 @@
-import { sortBy, pipe } from "remeda"
+import { sortBy, flow as pipe } from "lodash-es"
 
 export namespace Wildcard {
   export function match(str: string, pattern: string) {
@@ -17,7 +17,8 @@ export namespace Wildcard {
   }
 
   export function all(input: string, patterns: Record<string, any>) {
-    const sorted = pipe(patterns, Object.entries, sortBy([([key]) => key.length, "asc"], [([key]) => key, "asc"]))
+    const entries = Object.entries(patterns)
+    const sorted = sortBy(entries, [([key]) => key.length, "asc"], [([key]) => key, "asc"])
     let result = undefined
     for (const [pattern, value] of sorted) {
       if (match(input, pattern)) {
@@ -29,7 +30,8 @@ export namespace Wildcard {
   }
 
   export function allStructured(input: { head: string; tail: string[] }, patterns: Record<string, any>) {
-    const sorted = pipe(patterns, Object.entries, sortBy([([key]) => key.length, "asc"], [([key]) => key, "asc"]))
+    const entries = Object.entries(patterns)
+    const sorted = sortBy(entries, [([key]) => key.length, "asc"], [([key]) => key, "asc"])
     let result = undefined
     for (const [pattern, value] of sorted) {
       const parts = pattern.split(/\s+/)

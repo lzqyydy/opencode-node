@@ -3,7 +3,7 @@ import { Config } from "../../config/config"
 import { Provider } from "../../provider/provider"
 import { ModelsDev } from "../../provider/models"
 import { ProviderAuth } from "../../provider/auth"
-import { mapValues } from "remeda"
+import { mapValues } from "lodash-es"
 import { withInstance } from "../instance-context"
 
 export const ProviderRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {

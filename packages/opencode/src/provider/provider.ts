@@ -1,7 +1,7 @@
 import z from "zod"
 import fuzzysort from "fuzzysort"
 import {Config} from "../config/config"
-import {mapValues, mergeDeep, omit, pickBy, sortBy} from "remeda"
+import {mapValues, merge as mergeDeep, omit, pickBy, sortBy} from "lodash-es"
 import {NoSuchModelError, type Provider as SDK} from "ai"
 import {Log} from "../util/log"
 import {BunProc} from "../bun"
@@ -718,13 +718,11 @@ export namespace Provider {
       function mergeProvider(providerID: string, provider: Partial<Info>) {
         const existing = providers[providerID]
         if (existing) {
-          // @ts-expect-error
           providers[providerID] = mergeDeep(existing, provider)
           return
         }
         const match = database[providerID]
         if (!match) return
-        // @ts-expect-error
         providers[providerID] = mergeDeep(match, provider)
       }
 
