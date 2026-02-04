@@ -2,6 +2,9 @@ import z from "zod"
 import { spawn } from "child_process"
 import { Tool } from "./tool"
 import path from "path"
+import { createRequire } from "module"
+const require_ = createRequire(import.meta.url)
+
 import DESCRIPTION from "./bash.txt.ts"
 import { Log } from "../util/log"
 import { Instance } from "../project/instance"
@@ -9,8 +12,6 @@ import { lazy } from "@/util/lazy"
 import { Language } from "web-tree-sitter"
 
 import { $ } from "@/util/node-shell"
-import { Filesystem } from "@/util/filesystem"
-import { fileURLToPath } from "url"
 import { Flag } from "@/flag/flag.ts"
 import { Shell } from "@/shell/shell"
 
@@ -22,28 +23,23 @@ const DEFAULT_TIMEOUT = Flag.OPENCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS || 2 
 
 export const log = Log.create({ service: "bash-tool" })
 
-const resolveWasm = (asset: string) => {
-  if (asset.startsWith("file://")) return fileURLToPath(asset)
-  if (asset.startsWith("/") || /^[a-z]:/i.test(asset)) return asset
-  const url = new URL(asset, import.meta.url)
-  return fileURLToPath(url)
+const resolvePackage = (sourceName: string) => {
+  // 使用 require.resolve 获取资源路径
+  return require_.resolve(sourceName)
 }
 
 const parser = lazy(async () => {
   const { Parser } = await import("web-tree-sitter")
-  const { default: treeWasm } = await import("web-tree-sitter/tree-sitter.wasm" as string, {
-    with: { type: "wasm" },
-  })
-  const treePath = resolveWasm(treeWasm)
+
+  // Node.js 16 不支持 with: { type: "wasm" }，使用 require.resolve 获取路径
+  const treePath = resolvePackage("web-tree-sitter/tree-sitter.wasm")
   await Parser.init({
     locateFile() {
       return treePath
     },
   })
-  const { default: bashWasm } = await import("tree-sitter-bash/tree-sitter-bash.wasm" as string, {
-    with: { type: "wasm" },
-  })
-  const bashPath = resolveWasm(bashWasm)
+
+  const bashPath = resolvePackage("tree-sitter-bash/tree-sitter-bash.wasm")
   const bashLanguage = await Language.load(bashPath)
   const p = new Parser()
   p.setLanguage(bashLanguage)
