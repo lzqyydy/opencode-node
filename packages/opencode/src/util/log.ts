@@ -76,12 +76,10 @@ export namespace Log {
 
   async function cleanup(dir: string) {
     const glob = new NodePolyFillBun.Glob("????-??-??T??????.log")
-    const files = await Array.fromAsync(
-      glob.scan({
-        cwd: dir,
-        absolute: true,
-      }),
-    )
+    const files: string[] = []
+    for await (const file of glob.scan({ cwd: dir, absolute: true })) {
+      files.push(file)
+    }
     if (files.length <= 5) return
 
     const filesToDelete = files.slice(0, -10)

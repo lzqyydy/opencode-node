@@ -123,6 +123,7 @@
     "tree-sitter-bash": "0.25.0",
     "turndown": "7.2.0",
     "ulid": "3.0.1",
+    "undici": "5",
     "vscode-jsonrpc": "8.2.1",
     "web-streams-polyfill": "4.2.0",
     "web-tree-sitter": "0.25.10",
