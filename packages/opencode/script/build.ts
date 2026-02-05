@@ -261,7 +261,7 @@ for (const item of targets) {
       entryPoints: ["./src/index.ts"],
       bundle: true,
       platform: item.platform,
-      target: "node22",
+      target: "node16",
       format: "esm",
       outfile: path.join(binDir, "opencode.mjs"),
       sourcemap: "external",

@@ -657,7 +657,7 @@ export namespace MessageV2 {
 
   export function fromError(e: unknown, ctx: { providerID: string }) {
     switch (true) {
-      case e instanceof DOMException && e.name === "AbortError":
+      case e instanceof Error && e.name === "AbortError":
         return new MessageV2.AbortedError(
           { message: e.message },
           {

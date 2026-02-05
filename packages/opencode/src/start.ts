@@ -28,17 +28,24 @@ if (typeof Array.prototype.findLast !== 'function') {
   };
 }
 
-import {compare} from 'compare-versions';
-if (compare(process.version, '18.0.0', '<')) {
-  await import('web-streams-polyfill/polyfill');
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const ReadableStream = require('stream/web').ReadableStream;
+const WritableStream = require('stream/web').WritableStream;
+const TransformStream = require('stream/web').TransformStream;
+  if (typeof globalThis.ReadableStream === 'undefined') {
+    (globalThis as any).ReadableStream = ReadableStream;
+  }
+  if (typeof globalThis.WritableStream === 'undefined') {
+    (globalThis as any).WritableStream = WritableStream;
+  }
+  if (typeof globalThis.TransformStream === 'undefined') {
+    (globalThis as any).TransformStream = TransformStream;
+  }
+
 
   // polyfill for Fetch API (Headers, Request, Response, fetch)
   const undici = await import('undici');
-  // 配置更长的连接超时时间，解决 Node.js 16 下 undici ConnectTimeoutError 问题
-  undici.setGlobalDispatcher(new undici.Agent({
-    connectTimeout: 30_000,  // 30秒
-    headersTimeout: 60_000,  // 60秒
-  }));
   if (typeof globalThis.Headers === 'undefined') {
     (globalThis as any).Headers = undici.Headers;
   }
@@ -52,7 +59,14 @@ if (compare(process.version, '18.0.0', '<')) {
     (globalThis as any).fetch = undici.fetch;
   }
 
-  //polyfill for AbortSignal.timeout
+  // polyfill for TextDecoderStream and TextEncoderStream (Node.js 18+)
+  if (typeof globalThis.TextDecoderStream === 'undefined') {
+    const { TextEncoderStream, TextDecoderStream } = await import('@stardazed/streams-text-encoding');
+    (globalThis as any).TextDecoderStream = TextDecoderStream;
+    (globalThis as any).TextEncoderStream = TextEncoderStream;
+  }
+
+  // polyfill for AbortSignal.timeout
   if (!AbortSignal.timeout) {
     AbortSignal.timeout = function (timeout) {
       const controller = new AbortController();
@@ -60,8 +74,10 @@ if (compare(process.version, '18.0.0', '<')) {
       return controller.signal;
     }
   };
-}
+// }
 
 // 通过await import延迟加载，使得polyfill在主模块之前执行
 const {run} = await import('./index.ts');
 run();
+
+export {};
