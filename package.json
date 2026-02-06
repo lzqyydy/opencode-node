@@ -52,10 +52,7 @@
     "web-tree-sitter"
   ],
   "overrides": {
-    "@types/node": "22.13.9",
+    "@types/node": "16.11.7",
     "zod": "4.1.8"
-  },
-  "patchedDependencies": {
-    "ghostty-web@0.3.0": "patches/ghostty-web@0.3.0.patch"
   }
 }

@@ -20,8 +20,8 @@
     "zod": "4.1.8"
   },
   "devDependencies": {
-    "@tsconfig/node22": "22.0.2",
-    "@types/node": "22.13.9",
+    "@tsconfig/node16": "16.1.8",
+    "@types/node": "16.11.7",
     "typescript": "5.8.2",
     "@typescript/native-preview": "7.0.0-dev.20251207.1"
   }
