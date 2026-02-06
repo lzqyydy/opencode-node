@@ -16,9 +16,6 @@
     "./v2/client": "./src/v2/client.ts",
     "./v2/server": "./src/v2/server.ts"
   },
-  "files": [
-    "dist"
-  ],
   "devDependencies": {
     "@hey-api/openapi-ts": "0.90.4",
     "@tsconfig/node22": "22.0.2",
@@ -26,8 +23,5 @@
     "typescript": "5.8.2",
     "@typescript/native-preview": "7.0.0-dev.20251207.1"
   },
-  "dependencies": {},
-  "publishConfig": {
-    "directory": "dist"
-  }
+  "dependencies": {}
 }
